@@ -122,9 +122,50 @@ class Application2(Frame):
 
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
+        infoFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=.4, height=.3)
 
+        labIp = Label(infoFrame, text="IP : ", justify="left").grid(row = 1, column = 0, padx = 10, pady = 10)
+        labMasque = Label(infoFrame, text="Masque : ", justify="left").grid(row = 2, column = 0, padx = 10, pady = 10)
+        labReseau = Label(infoFrame, text="Réseau : ", justify="left").grid(row = 3, column = 0, padx = 10, pady = 10)
 
+        textIp = Entry(infoFrame)
+        textIp.grid(row = 1, column = 1, padx = 10, pady = 10)
+        textIp.insert(0, "0.0.0.0")
+        textMasque = Entry(infoFrame)
+        textMasque.grid(row = 2, column = 1, padx = 10, pady = 10)
+        textMasque.insert(0, "0.0.0.0")
+        textReseau = Entry(infoFrame)
+        textReseau.grid(row = 3, column = 1, padx = 10, pady = 10)
+        textReseau.insert(0, "0.0.0.0")
 
+        btnCheck = Button(infoFrame, text="Verifier l'Ip")
+        btnCheck.config(command= lambda: checkReseau())
+        btnCheck.grid(row = 4, column = 1, columnspan=2, padx = 10, pady = 10)
+
+        infoFrame.place(x=30, y=30)
+
+        rep = StringVar()
+        rep.set("")
+        lblVerif = Label(self, textvariable=rep, justify="center")
+        lblVerif.place(x=50, y=250)
+
+        def checkReseau() -> None :
+            """
+            Récupere Ip, Masque et Réseau entrés. Vérifie que tout soit valide. Explique si l'Ip fait partie du Réseau donné. 
+            """
+            rep.set("")
+
+            res = Reseau(textIp.get(), textMasque.get(), textReseau.get())
+            print(res.ip)
+
+            if (res.ip == "0.0.0.0"):
+                rep.set("Adresse IP non-valide")
+            elif (res.masque == "0.0.0.0"):
+                rep.set("Masque Réseau non-valide")
+            elif (res.adrReseau == "0.0.0.0"):
+                rep.set("Adresse Réseau ")
+            else:
+                pass
 
 class Application3(Frame):
     """
@@ -160,6 +201,23 @@ class Reseau():
     - Adresse du Sous Réseau
     """
 
+    def __init__(self, ip, masque, adrReseau) -> None:
+        if (Reseau.ipValide(ip)):
+            self.ip = ip
+        else:
+            self.ip = "0.0.0.0"
+        if (Reseau.masqueValide(masque)):
+            self.masque = masque
+        else:
+            self.masque = "0.0.0.0"
+        if (Reseau.reseauValide(adrReseau)):
+            self.adrReseau = adrReseau
+        else:
+            self.adrReseau = "0.0.0.0"
+        
+        self.adrBroadCast = "0.0.0.0"
+        self.adrSR = "0.0.0.0"
+
     def __init__(self, ip, masque) -> None:
         if (Reseau.ipValide(ip)):
             self.ip = ip
@@ -169,18 +227,21 @@ class Reseau():
             self.masque = masque
         else:
             self.masque = "0.0.0.0"
-        
+
         self.adrReseau = "0.0.0.0"
         self.adrBroadCast = "0.0.0.0"
         self.adrSR = "0.0.0.0"
-        
+         
+
     def ipValide(ip) -> bool:
-        pass
+        return True
 
     def masqueValide(masque) -> bool:
-        pass
+        return True
     
-
+    def reseauValide(reseau) -> bool:
+        return True
+    
   
 # Start
 app = MainApplication()
