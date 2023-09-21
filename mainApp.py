@@ -1,5 +1,6 @@
 from tkinter import *
-  
+
+### GROUPE 5 
 
 H_PADDING = 175
 V_PADDING = 100
@@ -109,7 +110,9 @@ class Application1(Frame):
     """
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-        
+
+
+
 
 class Application2(Frame):
     """
@@ -119,6 +122,7 @@ class Application2(Frame):
 
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
+
 
 
 
@@ -156,17 +160,16 @@ class Reseau():
     - Adresse du Sous Réseau
     """
 
-    # __ip = "0.0.0.0"
-    # self.adrReseau = "0.0.0.0"
-    # self.masque = "0.0.0.0"
-    # self.adrBroadCast = "0.0.0.0"
-    # self.adrSR = "0.0.0.0"
-
     def __init__(self, ip, masque) -> None:
         if (Reseau.ipValide(ip)):
             self.ip = ip
+        else:
+            self.ip = "0.0.0.0"
         if (Reseau.masqueValide(masque)):
             self.masque = masque
+        else:
+            self.masque = "0.0.0.0"
+        
         self.adrReseau = "0.0.0.0"
         self.adrBroadCast = "0.0.0.0"
         self.adrSR = "0.0.0.0"
