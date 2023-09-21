@@ -1,4 +1,5 @@
 from tkinter import *
+import ipaddress
 
 ### GROUPE 5 
 
@@ -110,6 +111,18 @@ class Application1(Frame):
     """
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
+        # IP label et Entry
+        labelIP = Label(self, text = "IP : ", justify="center")
+        labelIP.grid(row = 0, column = 0)
+        ipAdress = Entry(self)
+        ipAdress.grid(row = 0, column = 1,  columnspan = 3, padx = 10, pady = 10)
+
+        # Masque label et Entry
+        labelMasque = Label(self, text = "Masque : ", justify="center")
+        labelMasque.grid(row = 1, column = 0)
+        masqueAdress = Entry(self)
+        masqueAdress.grid(row = 1, column = 1,  columnspan = 3, padx = 10, pady = 10)
+        
 
 
 
@@ -170,17 +183,73 @@ class Reseau():
         else:
             self.masque = "0.0.0.0"
         
+        # Calcul du réseau
+        ReseauIP=[]
+        ListIP = ip.split(".")
+        ListMasque = masque.split(".")
+        i=0
+
+        for numberMasque in ListMasque:
+            if(numberMasque==255):
+                ReseauIP.append(ListIP[i])
+            else:
+                if(numberMasque==0):
+                    ReseauIP.append(ListIP[i])
+                else:
+                    numDel=128
+                    while(numDel!=numberMasque):
+                        if(numberMasque):
+                            i=1
+                        
+            i=i+1
+
+
         self.adrReseau = "0.0.0.0"
         self.adrBroadCast = "0.0.0.0"
         self.adrSR = "0.0.0.0"
         
+#  REUSSI NORMALEMENT ( A TEST )R 
     def ipValide(ip) -> bool:
-        pass
 
+        try:
+            ip_object = ipaddress.ip_address(ip)
+            return True
+        except ValueError:
+            return False
+
+#  REUSSI NORMALEMENT ( A TEST )
     def masqueValide(masque) -> bool:
-        pass
-    
+        ListMasque = masque.subnet_mask.strip().lower().split(".")
+        if len(ListMasque) != 4:
+            return False
+        
+        contiguous_ones = True
+        for octet in ListMasque:
+            try:
+                # Convert the octet to an integer
+                octet_value = int(octet)
 
+                # Check if the octet is within the valid range [0, 255]
+                if octet_value < 0 or octet_value > 255:
+                    return False
+
+                # Check if the octet is 255 (contiguous 1s)
+                if contiguous_ones:
+                    if octet_value != 255:
+                        contiguous_ones = False
+                else:
+                    # Check if the octet is 0 (contiguous 0s)
+                    if octet_value != 0:
+                        return False
+            except ValueError:
+                # If an octet is not a valid integer, return False
+                return False
+
+        # Check if there is at least one octet with contiguous 0s
+        if contiguous_ones:
+            return False
+
+        return True  
   
 # Start
 app = MainApplication()
