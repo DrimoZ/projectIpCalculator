@@ -1,4 +1,5 @@
 from tkinter import *
+import ipaddress
 
 ### GROUPE 5 
 
@@ -110,6 +111,18 @@ class Application1(Frame):
     """
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
+        # IP label et Entry
+        labelIP = Label(self, text = "IP : ", justify="center")
+        labelIP.grid(row = 0, column = 0)
+        ipAdress = Entry(self)
+        ipAdress.grid(row = 0, column = 1,  columnspan = 3, padx = 10, pady = 10)
+
+        # Masque label et Entry
+        labelMasque = Label(self, text = "Masque : ", justify="center")
+        labelMasque.grid(row = 1, column = 0)
+        masqueAdress = Entry(self)
+        masqueAdress.grid(row = 1, column = 1,  columnspan = 3, padx = 10, pady = 10)
+        
 
 
 
@@ -227,21 +240,18 @@ class Reseau():
             self.masque = masque
         else:
             self.masque = "0.0.0.0"
-
+        
         self.adrReseau = "0.0.0.0"
         self.adrBroadCast = "0.0.0.0"
         self.adrSR = "0.0.0.0"
-         
-
+        
     def ipValide(ip) -> bool:
-        return True
+        pass
 
     def masqueValide(masque) -> bool:
-        return True
+        pass
     
-    def reseauValide(reseau) -> bool:
-        return True
-    
+
   
 # Start
 app = MainApplication()
