@@ -251,7 +251,9 @@ class Reseau():
     def masqueValide(masque) -> bool:
         pass
     
-
+    def reseauValide(adrReseau) -> bool:
+        pass
+    
   
 # Start
 app = MainApplication()
