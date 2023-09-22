@@ -249,7 +249,7 @@ class Reseau():
         pass
 
     def masqueValide(masque) -> bool:
-            def masqueValide(masque) -> bool:
+            pass
 #         octets = subnet_mask.split('.')
 
 #     # Check if there are exactly 4 octets
