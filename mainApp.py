@@ -246,57 +246,51 @@ class Reseau():
         self.adrSR = "0.0.0.0"
         
     def ipValide(ip) -> bool:
-        pass
+        try:
+            ip_object = ipaddress.ip_address(ip)
+            octets = ip.strip().lower().split('.')
+            if(octets[0]==127 or octets[0]==0 or octets[0]>=224):
+                return False
+            return True
+        except ValueError:
+            return False
 
     def masqueValide(masque) -> bool:
-            pass
-#         octets = subnet_mask.split('.')
+        octets = masque.strip().lower().split('.')
 
-#     # Check if there are exactly 4 octets
-#     if len(octets) != 4:
-#         return False
+        # Check if there are exactly 4 octets
+        if len(octets) != 4:
+            return False
 
-#     # Initialize a flag to track contiguous 1s
-#     contiguous_ones = True
+        # Initialize a flag to track contiguous 1s
+        contiguous_ones = True
 
-#     for octet in octets:
-#         try:
-#             # Convert the octet to an integer
-#             octet_value = int(octet)
+        for octet in octets:
+            try:
+                # Convert the octet to an integer
+                octet_value = int(octet)
 
-#             # Check if the octet is within the valid range [0, 255]
-#             if octet_value < 0 or octet_value > 255:
-#                 return False
+                # Check if the octet is within the valid range [0, 255]
+                if octet_value < 0 or octet_value > 255:
+                    return False
 
-#             # Check if the octet is 255 (contiguous 1s)
-#             if contiguous_ones:
-#                 if octet_value != 255:
-#                     contiguous_ones = False
-#             else:
-#                 # Check if the octet is 0 (contiguous 0s)
-#                 if octet_value != 0:
-#                     return False
-#         except ValueError:
-#             # If an octet is not a valid integer, return False
-#             return False
+                # Check if the octet is 255 (contiguous 1s)
+                if contiguous_ones:
+                    if octet_value != 255:
+                        contiguous_ones = False
+                else:
+                    # Check if the octet is 0 (contiguous 0s)
+                    if octet_value != 0:
+                        return False
+            except ValueError:
+                # If an octet is not a valid integer, return False
+                return False
 
-#     # Check if there is at least one octet with contiguous 0s
-#     if contiguous_ones:
-#         return False
+        # Check if there is at least one octet with contiguous 0s
+        if contiguous_ones:
+            return False
 
-#     return True
-
-# # Get the subnet mask from the user
-# subnet_mask = input("Enter a subnet mask in the format xxx.xxx.xxx.xxx: ")
-
-# # Remove leading and trailing spaces and convert to lowercase for case-insensitivity
-# subnet_mask = subnet_mask.strip().lower()
-
-# # Check if it's a valid subnet mask
-# if is_valid_subnet_mask(subnet_mask):
-#     print("Valid subnet mask")
-# else:
-#     print("Invalid subnet mask")
+        return True
     
     def reseauValide(adrReseau) -> bool:
         pass
