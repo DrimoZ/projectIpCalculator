@@ -4,6 +4,10 @@ import webbrowser
 import sqlite3
 import bcrypt
 
+from PIL import ImageTk, Image
+import requests
+from io import BytesIO
+
 ### GROUPE 5 
 
 PAD_X = 30
@@ -99,9 +103,9 @@ class HomePage(Frame):
         label.grid(row = 0, column = 0,  columnspan = 3, padx = 10, pady = 10)
 
         list = [
-            ["Application 1", "aelskdbsdoilbkjsdbfjkqswbdfn\n <e<sljd<bfzeoimlwbfdjghzioqermdfbwljgv\n <osurdjlwfxbgs\n sfngxoubjrlsdfxcmiho<sbjl:dwxfc\n fhid os<mlfheoioi\n fhfi hdm<ifnogbd"],
-            ["Application 2", "aelskdbsdoilbkjsdbfjkqswbdfn\n <e<sljd<bfzeoimlwbfdjghzioqermdfbwljgv\n <osurdjlwfxbgs\n sfngxoubjrlsdfxcmiho<sbjl:dwxfc\n fhid os<mlfheoioi\n fhfi hdm<ifnogbd"],
-            ["Application 3", "aelskdbsdoilbkjsdbfjkqswbdfn\n <e<sljd<bfzeoimlwbfdjghzioqermdfbwljgv\n <osurdjlwfxbgs\n sfngxoubjrlsdfxcmiho<sbjl:dwxfc\n fhid os<mlfheoioi\n fhfi hdm<ifnogbd"],
+            ["Application 1", "https://www.aufildemma.com/8894/teinture-pour-le-polyester-idye-poly-rouge.jpg"],
+            ["Application 2", "https://whats-my-ip.org/wp-content/uploads/2021/10/what-is-my-ip-logo.png"],
+            ["Application 3", "https://whats-my-ip.org/wp-content/uploads/2021/10/what-is-my-ip-logo.png"],
         ]
 
         for i in range(0, len(list)):
@@ -109,8 +113,30 @@ class HomePage(Frame):
             frame = Frame(self, highlightbackground="red", highlightthickness=1)
 
 
-            label = Label(frame, text = list[i][1], font = 'Verdana 9', borderwidth=1, relief="solid", justify="center")
-            label.grid(row = 1, column = 0, padx = 10, pady = 10)
+            url=list[i][1]
+
+            # Fetch the image from the URL
+            response = requests.get(url)
+            img_data = response.content
+
+            # Convert the image data into a PIL Image
+            img = Image.open(BytesIO(img_data))
+
+            # Create a Tkinter PhotoImage object from the PIL Image
+            img_tk = ImageTk.PhotoImage(img)
+
+            # Resize the image to your desired dimensions (e.g., 300x300 pixels)
+            img = img.resize((700, 700), Image.Resampling.LANCZOS)
+
+
+            # , borderwidth=1, relief="solid", justify="center", width=200,height=200
+            label = Label(frame,image=img_tk,width=300,height=300)
+            
+            # Display the image in a Label widget
+            label.config(image=img_tk)
+            label.image = img_tk
+                
+            label.grid(row = 1, column = 0)
 
             appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid", cursor="hand2")
             if (i == 0):
@@ -534,6 +560,7 @@ class Reseau():
     def reseauValide(adrReseau: str) -> bool:
         return True
     
+
 class Connexion(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
@@ -661,6 +688,7 @@ class Connexion(Frame):
         c.close()
         conn.close()
         return
+    
 
 # Start
 app = MainApplication()
