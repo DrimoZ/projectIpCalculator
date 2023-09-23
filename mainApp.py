@@ -208,9 +208,13 @@ class Application1(Frame):
         self.repFrame.grid_propagate(0)
 
         rep = StringVar()
-        rep.set("OUI")
+        res = Reseau(self.textIp.get(), self.textMasque.get())
+        rep.set("Adresse de réseau  :"+ res.ip+"\n\
+                Adresse de broadcast :"+ res.masque)
         lblVerif = Label(self.repFrame, textvariable=rep, justify="center", fg="red")
         lblVerif.place(x=0, y=0)
+
+    
 
 
     def trouverReseau(self) -> None :
@@ -515,7 +519,7 @@ class Reseau():
         
     def ipValide(ip: str) -> bool:
         try:
-            ip_object = ipaddress.ip_address(ip)
+            ip_object = ipaddress.ip_address(ip) 
             octets = ip.strip().lower().split('.')
             if(octets[0]=="127" or octets[0]=="0" or octets[0]>="224"):
                 return False
@@ -568,7 +572,7 @@ class Reseau():
             return False
         
         return True
-    
+
     def convertMasque(masque: str) -> str:
         octets = masque.strip().lower().split('.')
         total=0
@@ -594,7 +598,7 @@ class Reseau():
                     case 254:
                         total+=7
         return "/"+total
-
+            
     def reseauValide(adrReseau: str) -> bool:
         return True
     
