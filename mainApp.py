@@ -1,5 +1,6 @@
 from tkinter import *
 import ipaddress
+import webbrowser
 
 ### GROUPE 5 
 
@@ -26,6 +27,7 @@ class MainApplication(Tk):
         container.grid_rowconfigure(0, weight = 1)
         container.grid_columnconfigure(0, weight = 1)
         quitButton = Button(self, text="Quitter l'application", command=self.destroy, cursor="hand2").place(x=SIZE_X-125, y=SIZE_Y-35)
+        githubButton = Button(self, text="GitHub", command=self.ouvrir_github, cursor="hand2").place(x=SIZE_X-125-55, y=SIZE_Y-35)
         returnButton = Button(self, text="Retourner au menu", command=lambda : self.show_frame(HomePage), cursor="hand2").place(x=10, y=SIZE_Y-35)
 
         self.frames = {} 
@@ -44,6 +46,9 @@ class MainApplication(Tk):
         if (not isinstance(frame, HomePage)):
             frame.reset()
         frame.tkraise()
+
+    def ouvrir_github(self):
+        webbrowser.open("https://github.com/DrimoZ/projectIpCalculator")
   
 # Page d'acceuil
 class HomePage(Frame):
@@ -68,7 +73,7 @@ class HomePage(Frame):
         list = [
             ["Application 1", "aelskdbsdoilbkjsdbfjkqswbdfn\n <e<sljd<bfzeoimlwbfdjghzioqermdfbwljgv\n <osurdjlwfxbgs\n sfngxoubjrlsdfxcmiho<sbjl:dwxfc\n fhid os<mlfheoioi\n fhfi hdm<ifnogbd"],
             ["Application 2", "aelskdbsdoilbkjsdbfjkqswbdfn\n <e<sljd<bfzeoimlwbfdjghzioqermdfbwljgv\n <osurdjlwfxbgs\n sfngxoubjrlsdfxcmiho<sbjl:dwxfc\n fhid os<mlfheoioi\n fhfi hdm<ifnogbd"],
-            ["Application 3", "aelskdbsdoilbkjsdbfjkqswbdfn\n <e<sljd<bfzeoimlwbfdjghzioqermdfbwljgv\n <osurdjlwfxbgs\n sfngxoubjrlsdfxcmiho<sbjl:dwxfc\n fhid os<mlfheoioi\n fhfi hdm<ifnogbd"]
+            ["Application 3", "aelskdbsdoilbkjsdbfjkqswbdfn\n <e<sljd<bfzeoimlwbfdjghzioqermdfbwljgv\n <osurdjlwfxbgs\n sfngxoubjrlsdfxcmiho<sbjl:dwxfc\n fhid os<mlfheoioi\n fhfi hdm<ifnogbd"],
         ]
 
         for i in range(0, len(list)):
@@ -101,35 +106,35 @@ class Application1(Frame):
         Frame.__init__(self, parent)
 
         # Frame - Données d'entrée
-        infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
-        infoFrame.grid_propagate(0)
-        infoFrame.config(width=270, height=170)
+        self.infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        self.infoFrame.grid_propagate(0)
+        self.infoFrame.config(width=270, height=170)
 
         # Labels
-        labIp = Label(infoFrame, text="IP * : ", justify="left").grid(row = 1, column = 0, padx = 10, pady = 10)
-        labMasque = Label(infoFrame, text="Masque : ", justify="left").grid(row = 2, column = 0, padx = 10, pady = 10)
+        labIp = Label(self.infoFrame, text="Adresse Ip * : ", width=15).grid(row = 1, column = 0, padx = 10, pady = 10)
+        labMasque = Label(self.infoFrame, text="Masque SR : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
 
         # Entries
-        textIp = Entry(infoFrame, width=25)
-        textIp.grid(row = 1, column = 1, padx = 10, pady = 10)
-        textIp.insert(0, "0.0.0.0")
-        textMasque = Entry(infoFrame, width=25)
-        textMasque.grid(row = 2, column = 1, padx = 10, pady = 10)
-        textMasque.insert(0, "0.0.0.0")
+        self.textIp = Entry(self.infoFrame, width=20)
+        self.textIp.grid(row = 1, column = 1, pady = 10)
+        self.textIp.insert(0, "0.0.0.0")
+        self.textMasque = Entry(self.infoFrame, width=20)
+        self.textMasque.grid(row = 2, column = 1, pady = 10)
+        self.textMasque.insert(0, "0.0.0.0")
 
         # Label d'erreur
-        attStr = StringVar()
-        attStr.set("")
-        lblVerif = Label(infoFrame, textvariable=attStr, justify="center", fg="red")
+        self.attStr = StringVar()
+        self.attStr.set("")
+        lblVerif = Label(self.infoFrame, textvariable=self.attStr, justify="center", fg="red")
         lblVerif.grid(row = 4, column = 0, columnspan=2, padx = 10, pady = 10)
 
         # Bouton de vérification
-        btnCheck = Button(infoFrame, text="Trouver le réseau", cursor="hand2") 
-        #btnCheck.config(command= lambda: checkReseau())
+        btnCheck = Button(self.infoFrame, text="Trouver le réseau", cursor="hand2") 
+        btnCheck.config(command= lambda: self.trouverReseau())
         btnCheck.grid(row = 5, column = 1, padx = 10, pady = 10)
 
         # Fin de la Frame d'entrée
-        infoFrame.place(x=30, y=30)
+        self.infoFrame.place(x=30, y=30)
 
 
         #Frame de Titre
@@ -144,20 +149,46 @@ class Application1(Frame):
         lblExo.place(x=10, y=40)
 
         #Frame - Reponses
-        repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
-        repFrame.grid_propagate(0)
+        self.repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
+        self.repFrame.grid_propagate(0)
 
         rep = StringVar()
         rep.set("OUI")
-        lblVerif = Label(repFrame, textvariable=rep, justify="center", fg="red")
+        lblVerif = Label(self.repFrame, textvariable=rep, justify="center", fg="red")
         lblVerif.place(x=0, y=0)
 
 
+    def trouverReseau(self) -> None :
+        """
+        Récupere Ip, Masque. Défini le réseau et le broadcast. Défini le sous-réseau si besoin.
+        """
 
+        self.attStr.set("")
+        self.repFrame.place_forget()
+
+        # Champ d'IP vide
+        if (self.textIp.get() == ""):
+            self.attStr.set("(*) Champ requis : IP" )
+            return
+        
+        # Instance de Reseau
+        res = Reseau(self.textIp.get(), self.textMasque.get())
+
+        # Vérification des champs
+        if (res.ip == "0.0.0.0"):
+            self.attStr.set("Adresse IP non-valide")
+        elif (res.masque == "0.0.0.0" and self.textMasque.get() != ""):
+            self.attStr.set("Masque Réseau non-valide")
+        else:
+            # TODO  : trouver le réseau
+            self.repFrame.place(x=330, y=150)
 
     # Fonction de reset de la frame
     def reset(self) -> None:
-        pass
+        self.attStr.set("")
+        self.textIp.delete(0, END)
+        self.textMasque.delete(0, END)
+        self.repFrame.place_forget()
         
 
 
@@ -178,19 +209,19 @@ class Application2(Frame):
         self.infoFrame.config(width=270, height=210)
 
         # Labels - Données d'entrée
-        labIp = Label(self.infoFrame, text="IP * : ", justify="left").grid(row = 1, column = 0, padx = 10, pady = 10)
-        labMasque = Label(self.infoFrame, text="Masque : ", justify="left").grid(row = 2, column = 0, padx = 10, pady = 10)
-        labReseau = Label(self.infoFrame, text="Réseau * : ", justify="left").grid(row = 3, column = 0, padx = 10, pady = 10)
+        labIp = Label(self.infoFrame, text="Adresse IP * : ", width=15).grid(row = 1, column = 0, padx = 10, pady = 10)
+        labMasque = Label(self.infoFrame, text="Masque SR : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
+        labReseau = Label(self.infoFrame, text="Adresse Réseau * : ", width=15).grid(row = 3, column = 0, padx = 10, pady = 10)
 
         # Entries - Données d'entrée
-        self.textIp = Entry(self.infoFrame, width=25)
-        self.textIp.grid(row = 1, column = 1, padx = 10, pady = 10)
+        self.textIp = Entry(self.infoFrame, width=20)
+        self.textIp.grid(row = 1, column = 1, pady = 10)
         self.textIp.insert(0, "0.0.0.0")
-        self.textMasque = Entry(self.infoFrame, width=25)
-        self.textMasque.grid(row = 2, column = 1, padx = 10, pady = 10)
+        self.textMasque = Entry(self.infoFrame, width=20)
+        self.textMasque.grid(row = 2, column = 1, pady = 10)
         self.textMasque.insert(0, "0.0.0.0")
-        self.textReseau = Entry(self.infoFrame, width=25)
-        self.textReseau.grid(row = 3, column = 1, padx = 10, pady = 10)
+        self.textReseau = Entry(self.infoFrame, width=20)
+        self.textReseau.grid(row = 3, column = 1, pady = 10)
         self.textReseau.insert(0, "0.0.0.0")
 
         # Errors - Données d'entrée
@@ -209,14 +240,14 @@ class Application2(Frame):
 
 
         # Frame - Titre
-        self.titleFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=90)
-        self.titleFrame.grid_propagate(0)
-        self.titleFrame.place(x=330, y=30)
+        titleFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=90)
+        titleFrame.grid_propagate(0)
+        titleFrame.place(x=330, y=30)
 
         # Labels - Titre
-        lblTitre = Label(self.titleFrame, text="Application 2 : Présence d'une IP dans le réseau", font = 'Times 14 underline' )
+        lblTitre = Label(titleFrame, text="Application 2 : Présence d'une IP dans le réseau", font = 'Times 14 underline' )
         lblTitre.place(x=10, y=10)
-        lblExo = Label(self.titleFrame, fg='blue', text="Sur base d’une IP, d’une adresse de réseau (et d'un masque si découpé en sous-réseau),\nvérifie si l’adresse IP donnée appartient au réseau ou pas. ", font = 'Times 11 italic', justify="left" )
+        lblExo = Label(titleFrame, fg='blue', text="Sur base d’une IP, d’une adresse de réseau (et d'un masque si découpé en sous-réseau),\nvérifie si l’adresse IP donnée appartient au réseau ou pas. ", font = 'Times 11 italic', justify="left" )
         lblExo.place(x=10, y=40)
 
 
@@ -255,6 +286,7 @@ class Application2(Frame):
         elif (res.adrReseau == "0.0.0.0"):
             self.attStr.set("Adresse Réseau non-valide")
         else:
+            # TODO  : Vérification de l'appartenance de l'ip au réseau
             self.repFrame.place(x=330, y=150)
         
 
@@ -289,7 +321,25 @@ class Application3(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
+        # Frame - Données d'entrée
+        self.infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        self.infoFrame.grid_propagate(0)
+        self.infoFrame.config(width=270, height=510)
 
+        # Labels - Données d'entrée
+        labReseau = Label(self.infoFrame, text="Adresse Réseau * : ", justify="left").grid(row = 1, column = 0, padx = 10, pady = 10)
+        labMasque = Label(self.infoFrame, text="Masque : ", justify="left").grid(row = 2, column = 0, padx = 10, pady = 10)
+
+        # Entries - Données d'entrée
+        self.textIp = Entry(self.infoFrame, width=25)
+        self.textIp.grid(row = 1, column = 1, padx = 10, pady = 10)
+        self.textIp.insert(0, "0.0.0.0")
+        self.textMasque = Entry(self.infoFrame, width=25)
+        self.textMasque.grid(row = 2, column = 1, padx = 10, pady = 10)
+        self.textMasque.insert(0, "0.0.0.0")
+        self.textReseau = Entry(self.infoFrame, width=25)
+        self.textReseau.grid(row = 3, column = 1, padx = 10, pady = 10)
+        self.textReseau.insert(0, "0.0.0.0")
 
 
 
