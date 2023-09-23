@@ -3,35 +3,35 @@ import ipaddress
 
 ### GROUPE 5 
 
-H_PADDING = 175
-V_PADDING = 100
-  
+PAD_X = 30
+PAD_Y = 30
+SIZE_X = 1000
+SIZE_Y = 560
+
 class MainApplication(Tk):
     """
     Main Application Class - Root
     """ 
 
     def __init__(self, *args, **kwargs):
-         
         Tk.__init__(self, *args, **kwargs)
-        self.geometry("1280x720")
+        self.geometry(f"{SIZE_X}x{SIZE_Y}")
         self.title("Réseau - Vérificateur d'IP")
+        self.resizable(False, False)
          
         # creating a container
-        container = Frame(self) 
-        container.pack(anchor=CENTER, fill = "both", expand = True, padx=H_PADDING, pady=V_PADDING)
+        container = Frame(self, cursor="tcross") 
+        container.pack(anchor=CENTER, fill = "both", expand = True)
   
         container.grid_rowconfigure(0, weight = 1)
         container.grid_columnconfigure(0, weight = 1)
-        quitButton = Button(self, text="Quitter l'application", command=self.destroy).place(x=1145, y=680)
-        returnButton = Button(self, text="Retourner au menu", command=lambda : self.show_frame(HomePage)).place(x=15, y=680)
+        quitButton = Button(self, text="Quitter l'application", command=self.destroy, cursor="hand2").place(x=SIZE_X-125, y=SIZE_Y-35)
+        returnButton = Button(self, text="Retourner au menu", command=lambda : self.show_frame(HomePage), cursor="hand2").place(x=10, y=SIZE_Y-35)
 
         self.frames = {} 
         for F in (HomePage, Application1, Application2, Application3):
   
             frame = F(container, self)
-            frame.config(highlightbackground="blue", highlightthickness=2)
-
             self.frames[F] = frame
 
             frame.grid(row = 0, column = 0, sticky ="nsew")
@@ -41,6 +41,8 @@ class MainApplication(Tk):
     # to display the current frame passed as parameter
     def show_frame(self, cont):
         frame = self.frames[cont]
+        if (not isinstance(frame, HomePage)):
+            frame.reset()
         frame.tkraise()
   
 # Page d'acceuil
@@ -72,13 +74,12 @@ class HomePage(Frame):
         for i in range(0, len(list)):
             self.grid_columnconfigure(i, weight=1)
             frame = Frame(self, highlightbackground="red", highlightthickness=1)
-            frame.grid(row = 1, column = i, padx = 10, pady = 10)
 
 
             label = Label(frame, text = list[i][1], font = 'Verdana 9', borderwidth=1, relief="solid", justify="center")
             label.grid(row = 1, column = 0, padx = 10, pady = 10)
 
-            appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid")
+            appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid", cursor="hand2")
             if (i == 0):
                 appButton.config(command = lambda : controller.show_frame(Application1))
             elif (i == 1):
@@ -87,20 +88,7 @@ class HomePage(Frame):
                 appButton.config(command = lambda : controller.show_frame(Application3))
 
             appButton.grid(row = 2, column = 0, padx = 10, pady = 10)
-
-        
-  
-        ## button to show frame 2 with text layout2
-        # button2 = Button(self, text ="Application 2",
-        # command = lambda : controller.show_frame(HomePage),borderwidth=1, relief="solid")
-        # button2.grid(row = 1, column = 1, padx = 10, pady = 10)
-
-        ## button to show frame 3 with text layout1
-        # button2 = Button(self, text ="Application 2",
-        # command = lambda : controller.show_frame(HomePage),borderwidth=1, relief="solid")
-        # button2.grid(row = 1, column = 2, padx = 10, pady = 10)
-
-
+            frame.grid(row = 1, column = i, padx = 10, pady = 10)
   
 class Application1(Frame):
     """
@@ -111,17 +99,65 @@ class Application1(Frame):
     """
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-        # IP label et Entry
-        labelIP = Label(self, text = "IP : ", justify="center")
-        labelIP.grid(row = 0, column = 0)
-        ipAdress = Entry(self)
-        ipAdress.grid(row = 0, column = 1,  columnspan = 3, padx = 10, pady = 10)
 
-        # Masque label et Entry
-        labelMasque = Label(self, text = "Masque : ", justify="center")
-        labelMasque.grid(row = 1, column = 0)
-        masqueAdress = Entry(self)
-        masqueAdress.grid(row = 1, column = 1,  columnspan = 3, padx = 10, pady = 10)
+        # Frame - Données d'entrée
+        infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        infoFrame.grid_propagate(0)
+        infoFrame.config(width=270, height=170)
+
+        # Labels
+        labIp = Label(infoFrame, text="IP * : ", justify="left").grid(row = 1, column = 0, padx = 10, pady = 10)
+        labMasque = Label(infoFrame, text="Masque : ", justify="left").grid(row = 2, column = 0, padx = 10, pady = 10)
+
+        # Entries
+        textIp = Entry(infoFrame, width=25)
+        textIp.grid(row = 1, column = 1, padx = 10, pady = 10)
+        textIp.insert(0, "0.0.0.0")
+        textMasque = Entry(infoFrame, width=25)
+        textMasque.grid(row = 2, column = 1, padx = 10, pady = 10)
+        textMasque.insert(0, "0.0.0.0")
+
+        # Label d'erreur
+        attStr = StringVar()
+        attStr.set("")
+        lblVerif = Label(infoFrame, textvariable=attStr, justify="center", fg="red")
+        lblVerif.grid(row = 4, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        # Bouton de vérification
+        btnCheck = Button(infoFrame, text="Trouver le réseau", cursor="hand2") 
+        #btnCheck.config(command= lambda: checkReseau())
+        btnCheck.grid(row = 5, column = 1, padx = 10, pady = 10)
+
+        # Fin de la Frame d'entrée
+        infoFrame.place(x=30, y=30)
+
+
+        #Frame de Titre
+        titleFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=90)
+        titleFrame.grid_propagate(0)
+        titleFrame.place(x=330, y=30)
+
+        #Labels - Titre
+        lblTitre = Label(titleFrame, text="Application 1 : Détermination du Réseau", font = 'Times 14 underline' )
+        lblTitre.place(x=10, y=10)
+        lblExo = Label(titleFrame, fg='blue', text="Sur base d’une IP et d’un masque (facultatif), fournit l’adresse de réseau et le broadcast\ndu réseau. Si une découpe en sous-réseau est réalisée, détermine l’adresse du sous-réseau.", font = 'Times 11 italic', justify="left" )
+        lblExo.place(x=10, y=40)
+
+        #Frame - Reponses
+        repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
+        repFrame.grid_propagate(0)
+
+        rep = StringVar()
+        rep.set("OUI")
+        lblVerif = Label(repFrame, textvariable=rep, justify="center", fg="red")
+        lblVerif.place(x=0, y=0)
+
+
+
+
+    # Fonction de reset de la frame
+    def reset(self) -> None:
+        pass
         
 
 
@@ -135,50 +171,101 @@ class Application2(Frame):
 
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-        infoFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=.4, height=.3)
 
-        labIp = Label(infoFrame, text="IP : ", justify="left").grid(row = 1, column = 0, padx = 10, pady = 10)
-        labMasque = Label(infoFrame, text="Masque : ", justify="left").grid(row = 2, column = 0, padx = 10, pady = 10)
-        labReseau = Label(infoFrame, text="Réseau : ", justify="left").grid(row = 3, column = 0, padx = 10, pady = 10)
+        # Frame - Données d'entrée
+        self.infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        self.infoFrame.grid_propagate(0)
+        self.infoFrame.config(width=270, height=210)
 
-        textIp = Entry(infoFrame)
-        textIp.grid(row = 1, column = 1, padx = 10, pady = 10)
-        textIp.insert(0, "0.0.0.0")
-        textMasque = Entry(infoFrame)
-        textMasque.grid(row = 2, column = 1, padx = 10, pady = 10)
-        textMasque.insert(0, "0.0.0.0")
-        textReseau = Entry(infoFrame)
-        textReseau.grid(row = 3, column = 1, padx = 10, pady = 10)
-        textReseau.insert(0, "0.0.0.0")
+        # Labels - Données d'entrée
+        labIp = Label(self.infoFrame, text="IP * : ", justify="left").grid(row = 1, column = 0, padx = 10, pady = 10)
+        labMasque = Label(self.infoFrame, text="Masque : ", justify="left").grid(row = 2, column = 0, padx = 10, pady = 10)
+        labReseau = Label(self.infoFrame, text="Réseau * : ", justify="left").grid(row = 3, column = 0, padx = 10, pady = 10)
 
-        btnCheck = Button(infoFrame, text="Verifier l'Ip")
-        btnCheck.config(command= lambda: checkReseau())
-        btnCheck.grid(row = 4, column = 1, columnspan=2, padx = 10, pady = 10)
+        # Entries - Données d'entrée
+        self.textIp = Entry(self.infoFrame, width=25)
+        self.textIp.grid(row = 1, column = 1, padx = 10, pady = 10)
+        self.textIp.insert(0, "0.0.0.0")
+        self.textMasque = Entry(self.infoFrame, width=25)
+        self.textMasque.grid(row = 2, column = 1, padx = 10, pady = 10)
+        self.textMasque.insert(0, "0.0.0.0")
+        self.textReseau = Entry(self.infoFrame, width=25)
+        self.textReseau.grid(row = 3, column = 1, padx = 10, pady = 10)
+        self.textReseau.insert(0, "0.0.0.0")
 
-        infoFrame.place(x=30, y=30)
+        # Errors - Données d'entrée
+        self.attStr = StringVar()
+        self.attStr.set("")
+        lblVerif = Label(self.infoFrame, textvariable=self.attStr, justify="center", fg="red")
+        lblVerif.grid(row = 4, column = 0, columnspan=2, padx = 10, pady = 10)
 
-        rep = StringVar()
-        rep.set("")
-        lblVerif = Label(self, textvariable=rep, justify="center")
-        lblVerif.place(x=50, y=250)
+        # Buttons - Données d'entrée
+        btnCheck = Button(self.infoFrame, text="Verifier l'adresse Ip", cursor="hand2")
+        btnCheck.config(command= lambda: self.checkReseau())
+        btnCheck.grid(row = 5, column = 1, padx = 10, pady = 10)
 
-        def checkReseau() -> None :
-            """
-            Récupere Ip, Masque et Réseau entrés. Vérifie que tout soit valide. Explique si l'Ip fait partie du Réseau donné. 
-            """
-            rep.set("")
+        # Fin de la Frame d'entrée
+        self.infoFrame.place(x=30, y=30)
 
-            res = Reseau(textIp.get(), textMasque.get(), textReseau.get())
-            print(res.ip)
 
-            if (res.ip == "0.0.0.0"):
-                rep.set("Adresse IP non-valide")
-            elif (res.masque == "0.0.0.0"):
-                rep.set("Masque Réseau non-valide")
-            elif (res.adrReseau == "0.0.0.0"):
-                rep.set("Adresse Réseau ")
-            else:
-                pass
+        # Frame - Titre
+        self.titleFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=90)
+        self.titleFrame.grid_propagate(0)
+        self.titleFrame.place(x=330, y=30)
+
+        # Labels - Titre
+        lblTitre = Label(self.titleFrame, text="Application 2 : Présence d'une IP dans le réseau", font = 'Times 14 underline' )
+        lblTitre.place(x=10, y=10)
+        lblExo = Label(self.titleFrame, fg='blue', text="Sur base d’une IP, d’une adresse de réseau (et d'un masque si découpé en sous-réseau),\nvérifie si l’adresse IP donnée appartient au réseau ou pas. ", font = 'Times 11 italic', justify="left" )
+        lblExo.place(x=10, y=40)
+
+
+        # Frame - Réponses
+        self.repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
+        self.repFrame.grid_propagate(0)
+
+        # Labels - Titre
+        self.rep = StringVar()
+        self.rep.set("OUI")
+        lblVerif = Label(self.repFrame, textvariable=self.rep, justify="center", fg="red")
+        lblVerif.place(x=0, y=0)
+
+
+    def checkReseau(self) -> None :
+        """
+        Récupere Ip, Masque et Réseau entrés. Vérifie que tout soit valide. Explique si l'Ip fait partie du Réseau donné. 
+        """
+
+        self.attStr.set("")
+        self.repFrame.place_forget()
+
+        # Un des champs est vide
+        if (self.textIp.get() == "" or self.textReseau.get() == ""):
+            self.attStr.set("(*) Champs requis : " + ("IP" if self.textIp.get() == "" else "") + (" et " if self.textIp.get() == "" and self.textReseau.get() == "" else "") + ("Adresse de réseau" if self.textReseau.get() == "" else ""))
+            return
+        
+        # Instance de Reseau
+        res = Reseau(self.textIp.get(), self.textMasque.get(), self.textReseau.get())
+
+        # Vérification des champs
+        if (res.ip == "0.0.0.0"):
+            self.attStr.set("Adresse IP non-valide")
+        elif (res.masque == "0.0.0.0" and self.textMasque.get() != ""):
+            self.attStr.set("Masque Réseau non-valide")
+        elif (res.adrReseau == "0.0.0.0"):
+            self.attStr.set("Adresse Réseau non-valide")
+        else:
+            self.repFrame.place(x=330, y=150)
+        
+
+    # Fonction de reset de la frame
+    def reset(self) -> None:
+        self.attStr.set("")
+        self.textIp.delete(0, END)
+        self.textMasque.delete(0, END)
+        self.textReseau.delete(0, END)
+        self.repFrame.place_forget()
+
 
 class Application3(Frame):
     """
@@ -204,6 +291,13 @@ class Application3(Frame):
 
 
 
+
+
+    # Fonction de reset de la frame
+    def reset(self) -> None:
+        pass
+
+
 class Reseau():
     """
     Reprend toutes les informations et méthodes de verification/recherche/etc de réseau ou ip. 
@@ -214,37 +308,35 @@ class Reseau():
     - Adresse du Sous Réseau
     """
 
-    def __init__(self, ip, masque, adrReseau) -> None:
+    def __init__(self, ip: str, masque: str, adrReseau: str = "0.0.0.0") -> None:
         if (Reseau.ipValide(ip)):
-            self.ip = ip
+            self.ip: str = ip
         else:
-            self.ip = "0.0.0.0"
+            self.ip: str = "0.0.0.0"
         if (Reseau.masqueValide(masque)):
-            self.masque = masque
+            self.masque: str = masque
         else:
-            self.masque = "0.0.0.0"
+            self.masque: str = "0.0.0.0"
         if (Reseau.reseauValide(adrReseau)):
-            self.adrReseau = adrReseau
+            self.adrReseau: str = adrReseau
         else:
-            self.adrReseau = "0.0.0.0"
+            self.adrReseau: str = "0.0.0.0"
         
-        self.adrBroadCast = "0.0.0.0"
-        self.adrSR = "0.0.0.0"
+        self.adrBroadCast: str = "0.0.0.0"
+        self.adrSR: str = "0.0.0.0"
+        
+    def ipValide(ip: str) -> bool:
+        return True
 
-    def __init__(self, ip, masque) -> None:
-        if (Reseau.ipValide(ip)):
-            self.ip = ip
-        else:
-            self.ip = "0.0.0.0"
-        if (Reseau.masqueValide(masque)):
-            self.masque = masque
-        else:
-            self.masque = "0.0.0.0"
+    def masqueValide(masque: str) -> bool:
+        masque = masque.strip().lower()
+        octets = masque.split('.')
+
+        # Check if there are exactly 4 octets
+        if len(octets) != 4:
+            return False
         
-        self.adrReseau = "0.0.0.0"
-        self.adrBroadCast = "0.0.0.0"
-        self.adrSR = "0.0.0.0"
-        
+<<<<<<< HEAD
     def ipValide(ip) -> bool:
         try:
             ip_object = ipaddress.ip_address(ip)
@@ -294,6 +386,39 @@ class Reseau():
     
     def reseauValide(adrReseau) -> bool:
         pass
+=======
+        # Initialize a flag to track contiguous 1s
+        contiguous_ones = True
+
+        for octet in octets:
+            try:
+                # Convert the octet to an integer
+                octet_value = int(octet)
+                # Check if the octet is within the valid range [0, 255]
+                if octet_value < 0 or octet_value > 255:
+                    return False
+                # Check if the octet is 255 (contiguous 1s)
+                if contiguous_ones:
+                    if octet_value != 255:
+                        contiguous_ones = False
+                else:
+                    # Check if the octet is 0 (contiguous 0s)
+                    if octet_value != 0:
+                        return False
+                    
+            except ValueError:
+                # If an octet is not a valid integer, return False
+                return False
+            
+        # Check if there is at least one octet with contiguous 0s
+        if contiguous_ones:
+            return False
+        
+        return True
+
+    def reseauValide(adrReseau: str) -> bool:
+        return True
+>>>>>>> 666f269842f68fa05f330d1743694c9a8d614950
     
   
 # Start
