@@ -361,7 +361,7 @@ class Application3(Frame):
 
         # Buttons - Données d'entrée
         btnCheck = Button(self.infoFrame, text="Créer les sous-réseaux", cursor="hand2")
-        # btnCheck.config(command= lambda: self.checkReseau())
+        btnCheck.config(command= lambda: self.createSR())
         btnCheck.grid(row = 6, column = 0, columnspan=2, padx = 10, pady = 10)
 
         # Fin de la Frame d'entrée
@@ -375,7 +375,7 @@ class Application3(Frame):
         # Labels - Titre
         lblTitre = Label(titleFrame, text="Application 3 : Création de Sous-Réseaux", font = 'Times 14 underline' )
         lblTitre.place(x=10, y=10)
-        lblExo = Label(titleFrame, fg='blue', text="Sur base d’une IP, d’une adresse de réseau (et d'un masque si découpé en sous-réseau),\nvérifie si l’adresse IP donnée appartient au réseau ou pas. ", font = 'Times 11 italic', justify="left" )
+        lblExo = Label(titleFrame, fg='blue', text="Sur base d’une adresse de réseau et d'informations sur les sous-résaux souhaités,\ncrée une une découpe en sous-réseau classique si possible et fournit un plan d'adressage complet.", font = 'Times 11 italic', justify="left" )
         lblExo.place(x=10, y=40)
 
 
@@ -389,6 +389,32 @@ class Application3(Frame):
         lblVerif = Label(self.repFrame, textvariable=self.rep, justify="center", fg="red")
         lblVerif.place(x=0, y=0)
 
+
+    def createSR(self) -> None :
+        """
+        Récupere Réseau et Données de SR entrés. Crée les sous-réseaux si possible.
+        """
+
+        self.attStr.set("")
+        self.repFrame.place_forget()
+
+        # Un des champs est vide
+        if (self.textReseau.get() == "" or self.textMasque.get() == "" or self.textHotes.get() == "" or self.textSR.get() == ""):
+            self.attStr.set("(*) Tous les champs sont requis")
+            return
+        
+        # Instance de Reseau
+        res = Reseau("0.0.0.0", self.textMasque.get(), self.textReseau.get())
+
+        # Vérification des champs
+        if (res.masque == "0.0.0.0" and self.textMasque.get() != ""):
+            self.attStr.set("Masque Réseau non-valide")
+        elif (res.adrReseau == "0.0.0.0"):
+            self.attStr.set("Adresse Réseau non-valide")
+        else:
+            # TODO  : Vérification de l'appartenance de l'ip au réseau
+            self.repFrame.place(x=330, y=150)
+
     def verifCaracter(self, P):
         if str.isdigit(P) or P == "" or P == ".":
             return True
@@ -399,6 +425,9 @@ class Application3(Frame):
     def reset(self) -> None:
         self.textMasque.delete(0, END)
         self.textReseau.delete(0, END)
+        self.textSR.delete(0, END)
+        self.textHotes.delete(0, END)
+        self.repFrame.place_forget()
 
 
 class Reseau():
