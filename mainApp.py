@@ -2,7 +2,7 @@ from tkinter import *
 import ipaddress
 import webbrowser
 from PIL import ImageTk, Image
-from urllib.request import Request, urlopen
+import requests
 from io import BytesIO
 
 ### GROUPE 5 
@@ -83,20 +83,31 @@ class HomePage(Frame):
             self.grid_columnconfigure(i, weight=1)
             frame = Frame(self, highlightbackground="red", highlightthickness=1)
 
-            req = Request(
-                url=list[i][1], 
-                headers={'User-Agent': 'Mozilla/5.0'}
-            )
-            u = urlopen(req)
-            raw_data = u.read()
-            u.close()
 
-            im = Image.open(BytesIO(raw_data))
-            im = im.resize((200,200),Image.Resampling.LANCZOS)
-            photo = ImageTk.PhotoImage(im)
+            url=list[i][1]
 
-            label = Label(frame,image=photo, borderwidth=1, relief="solid", justify="center", width=200,height=200)
-            label.grid(row = 1, column = 0, padx = 10, pady = 10)
+            # Fetch the image from the URL
+            response = requests.get(url)
+            img_data = response.content
+
+            # Convert the image data into a PIL Image
+            img = Image.open(BytesIO(img_data))
+
+            # Create a Tkinter PhotoImage object from the PIL Image
+            img_tk = ImageTk.PhotoImage(img)
+
+            # Resize the image to your desired dimensions (e.g., 300x300 pixels)
+            img = img.resize((700, 700), Image.Resampling.LANCZOS)
+
+
+            # , borderwidth=1, relief="solid", justify="center", width=200,height=200
+            label = Label(frame,image=img_tk,width=300,height=300)
+            
+            # Display the image in a Label widget
+            label.config(image=img_tk)
+            label.image = img_tk
+                
+            label.grid(row = 1, column = 0)
 
             appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid", cursor="hand2")
             if (i == 0):
