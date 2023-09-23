@@ -3,35 +3,35 @@ import ipaddress
 
 ### GROUPE 5 
 
-H_PADDING = 175
-V_PADDING = 100
-  
+PAD_X = 30
+PAD_Y = 30
+SIZE_X = 1000
+SIZE_Y = 560
+
 class MainApplication(Tk):
     """
     Main Application Class - Root
     """ 
 
     def __init__(self, *args, **kwargs):
-         
         Tk.__init__(self, *args, **kwargs)
-        self.geometry("1280x720")
+        self.geometry(f"{SIZE_X}x{SIZE_Y}")
         self.title("Réseau - Vérificateur d'IP")
+        self.resizable(False, False)
          
         # creating a container
-        container = Frame(self) 
-        container.pack(anchor=CENTER, fill = "both", expand = True, padx=H_PADDING, pady=V_PADDING)
+        container = Frame(self, cursor="tcross") 
+        container.pack(anchor=CENTER, fill = "both", expand = True)
   
         container.grid_rowconfigure(0, weight = 1)
         container.grid_columnconfigure(0, weight = 1)
-        quitButton = Button(self, text="Quitter l'application", command=self.destroy).place(x=1145, y=680)
-        returnButton = Button(self, text="Retourner au menu", command=lambda : self.show_frame(HomePage)).place(x=15, y=680)
+        quitButton = Button(self, text="Quitter l'application", command=self.destroy, cursor="hand2").place(x=SIZE_X-125, y=SIZE_Y-35)
+        returnButton = Button(self, text="Retourner au menu", command=lambda : self.show_frame(HomePage), cursor="hand2").place(x=10, y=SIZE_Y-35)
 
         self.frames = {} 
         for F in (HomePage, Application1, Application2, Application3):
   
             frame = F(container, self)
-            frame.config(highlightbackground="blue", highlightthickness=2)
-
             self.frames[F] = frame
 
             frame.grid(row = 0, column = 0, sticky ="nsew")
@@ -72,13 +72,12 @@ class HomePage(Frame):
         for i in range(0, len(list)):
             self.grid_columnconfigure(i, weight=1)
             frame = Frame(self, highlightbackground="red", highlightthickness=1)
-            frame.grid(row = 1, column = i, padx = 10, pady = 10)
 
 
             label = Label(frame, text = list[i][1], font = 'Verdana 9', borderwidth=1, relief="solid", justify="center")
             label.grid(row = 1, column = 0, padx = 10, pady = 10)
 
-            appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid")
+            appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid", cursor="hand2")
             if (i == 0):
                 appButton.config(command = lambda : controller.show_frame(Application1))
             elif (i == 1):
@@ -87,20 +86,7 @@ class HomePage(Frame):
                 appButton.config(command = lambda : controller.show_frame(Application3))
 
             appButton.grid(row = 2, column = 0, padx = 10, pady = 10)
-
-        
-  
-        ## button to show frame 2 with text layout2
-        # button2 = Button(self, text ="Application 2",
-        # command = lambda : controller.show_frame(HomePage),borderwidth=1, relief="solid")
-        # button2.grid(row = 1, column = 1, padx = 10, pady = 10)
-
-        ## button to show frame 3 with text layout1
-        # button2 = Button(self, text ="Application 2",
-        # command = lambda : controller.show_frame(HomePage),borderwidth=1, relief="solid")
-        # button2.grid(row = 1, column = 2, padx = 10, pady = 10)
-
-
+            frame.grid(row = 1, column = i, padx = 10, pady = 10)
   
 class Application1(Frame):
     """
@@ -111,17 +97,65 @@ class Application1(Frame):
     """
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-        # IP label et Entry
-        labelIP = Label(self, text = "IP : ", justify="center")
-        labelIP.grid(row = 0, column = 0)
-        ipAdress = Entry(self)
-        ipAdress.grid(row = 0, column = 1,  columnspan = 3, padx = 10, pady = 10)
 
-        # Masque label et Entry
-        labelMasque = Label(self, text = "Masque : ", justify="center")
-        labelMasque.grid(row = 1, column = 0)
-        masqueAdress = Entry(self)
-        masqueAdress.grid(row = 1, column = 1,  columnspan = 3, padx = 10, pady = 10)
+        # Frame - Données d'entrée
+        infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        infoFrame.grid_propagate(0)
+        infoFrame.config(width=270, height=170)
+
+        # Labels
+        labIp = Label(infoFrame, text="IP * : ", justify="left").grid(row = 1, column = 0, padx = 10, pady = 10)
+        labMasque = Label(infoFrame, text="Masque : ", justify="left").grid(row = 2, column = 0, padx = 10, pady = 10)
+
+        # Entries
+        textIp = Entry(infoFrame, width=25)
+        textIp.grid(row = 1, column = 1, padx = 10, pady = 10)
+        textIp.insert(0, "0.0.0.0")
+        textMasque = Entry(infoFrame, width=25)
+        textMasque.grid(row = 2, column = 1, padx = 10, pady = 10)
+        textMasque.insert(0, "0.0.0.0")
+
+        # Label d'erreur
+        attStr = StringVar()
+        attStr.set("")
+        lblVerif = Label(infoFrame, textvariable=attStr, justify="center", fg="red")
+        lblVerif.grid(row = 4, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        # Bouton de vérification
+        btnCheck = Button(infoFrame, text="Trouver le réseau", cursor="hand2") 
+        #btnCheck.config(command= lambda: checkReseau())
+        btnCheck.grid(row = 5, column = 1, padx = 10, pady = 10)
+
+        # Fin de la Frame d'entrée
+        infoFrame.place(x=30, y=30)
+
+
+        #Frame de Titre
+        titleFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=90)
+        titleFrame.grid_propagate(0)
+        titleFrame.place(x=330, y=30)
+
+        #Labels - Titre
+        lblTitre = Label(titleFrame, text="Application 1 : Détermination du Réseau", font = 'Times 14 underline' )
+        lblTitre.place(x=10, y=10)
+        lblExo = Label(titleFrame, fg='blue', text="Sur base d’une IP et d’un masque (facultatif), fournit l’adresse de réseau et le broadcast\ndu réseau. Si une découpe en sous-réseau est réalisée, détermine l’adresse du sous-réseau.", font = 'Times 11 italic', justify="left" )
+        lblExo.place(x=10, y=40)
+
+        #Frame - Reponses
+        repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
+        repFrame.grid_propagate(0)
+
+        rep = StringVar()
+        rep.set("OUI")
+        lblVerif = Label(repFrame, textvariable=rep, justify="center", fg="red")
+        lblVerif.place(x=0, y=0)
+
+
+
+
+        # Fonction de reset de la frame
+        def reset(self) -> None:
+            pass
         
 
 
@@ -135,50 +169,101 @@ class Application2(Frame):
 
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-        infoFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=.4, height=.3)
 
-        labIp = Label(infoFrame, text="IP : ", justify="left").grid(row = 1, column = 0, padx = 10, pady = 10)
+        # Frame - Données d'entrée
+        infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        infoFrame.grid_propagate(0)
+        infoFrame.config(width=270, height=210)
+
+        # Labels - Données d'entrée
+        labIp = Label(infoFrame, text="IP * : ", justify="left").grid(row = 1, column = 0, padx = 10, pady = 10)
         labMasque = Label(infoFrame, text="Masque : ", justify="left").grid(row = 2, column = 0, padx = 10, pady = 10)
-        labReseau = Label(infoFrame, text="Réseau : ", justify="left").grid(row = 3, column = 0, padx = 10, pady = 10)
+        labReseau = Label(infoFrame, text="Réseau * : ", justify="left").grid(row = 3, column = 0, padx = 10, pady = 10)
 
-        textIp = Entry(infoFrame)
+        # Entries - Données d'entrée
+        textIp = Entry(infoFrame, width=25)
         textIp.grid(row = 1, column = 1, padx = 10, pady = 10)
         textIp.insert(0, "0.0.0.0")
-        textMasque = Entry(infoFrame)
+        textMasque = Entry(infoFrame, width=25)
         textMasque.grid(row = 2, column = 1, padx = 10, pady = 10)
         textMasque.insert(0, "0.0.0.0")
-        textReseau = Entry(infoFrame)
+        textReseau = Entry(infoFrame, width=25)
         textReseau.grid(row = 3, column = 1, padx = 10, pady = 10)
         textReseau.insert(0, "0.0.0.0")
 
-        btnCheck = Button(infoFrame, text="Verifier l'Ip")
-        btnCheck.config(command= lambda: checkReseau())
-        btnCheck.grid(row = 4, column = 1, columnspan=2, padx = 10, pady = 10)
+        # Errors - Données d'entrée
+        attStr = StringVar()
+        attStr.set("")
+        lblVerif = Label(infoFrame, textvariable=attStr, justify="center", fg="red")
+        lblVerif.grid(row = 4, column = 0, columnspan=2, padx = 10, pady = 10)
 
+        # Buttons - Données d'entrée
+        btnCheck = Button(infoFrame, text="Verifier l'adresse Ip", cursor="hand2")
+        btnCheck.config(command= lambda: checkReseau())
+        btnCheck.grid(row = 5, column = 1, padx = 10, pady = 10)
+
+        # Fin de la Frame d'entrée
         infoFrame.place(x=30, y=30)
 
+
+        # Frame - Titre
+        titleFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=90)
+        titleFrame.grid_propagate(0)
+        titleFrame.place(x=330, y=30)
+
+        # Labels - Titre
+        lblTitre = Label(titleFrame, text="Application 2 : Présence d'une IP dans le réseau", font = 'Times 14 underline' )
+        lblTitre.place(x=10, y=10)
+        lblExo = Label(titleFrame, fg='blue', text="Sur base d’une IP, d’une adresse de réseau (et d'un masque si découpé en sous-réseau),\nvérifie si l’adresse IP donnée appartient au réseau ou pas. ", font = 'Times 11 italic', justify="left" )
+        lblExo.place(x=10, y=40)
+
+
+        # Frame - Réponses
+        repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
+        repFrame.grid_propagate(0)
+
+        # Labels - Titre
         rep = StringVar()
-        rep.set("")
-        lblVerif = Label(self, textvariable=rep, justify="center")
-        lblVerif.place(x=50, y=250)
+        rep.set("OUI")
+        lblVerif = Label(repFrame, textvariable=rep, justify="center", fg="red")
+        lblVerif.place(x=0, y=0)
+
 
         def checkReseau() -> None :
             """
             Récupere Ip, Masque et Réseau entrés. Vérifie que tout soit valide. Explique si l'Ip fait partie du Réseau donné. 
             """
-            rep.set("")
+            attStr.set("")
+            repFrame.place_forget()
 
+            # Un des champs est vide
+            if (textIp.get() == ""):
+                attStr.set("(*) Veuillez entrer une adresse IP")
+                return
+            elif (textReseau.get() == ""):
+                attStr.set("(*) Veuillez entrer une adresse de réseau")
+                return
+
+            # Instance de Reseau
             res = Reseau(textIp.get(), textMasque.get(), textReseau.get())
-            print(res.ip)
 
+            # Vérification des champs
             if (res.ip == "0.0.0.0"):
-                rep.set("Adresse IP non-valide")
+                attStr.set("Adresse IP non-valide")
             elif (res.masque == "0.0.0.0"):
-                rep.set("Masque Réseau non-valide")
+                attStr.set("Masque Réseau non-valide")
             elif (res.adrReseau == "0.0.0.0"):
-                rep.set("Adresse Réseau ")
+                attStr.set("Adresse Réseau non-valide")
             else:
-                pass
+                repFrame.place(x=330, y=150)
+        
+        # Fonction de reset de la frame
+        def reset(self) -> None:
+            attStr.set("")
+            textIp.delete(0, END)
+            textMasque.delete(0, END)
+            textReseau.delete(0, END)
+
 
 class Application3(Frame):
     """
@@ -204,6 +289,13 @@ class Application3(Frame):
 
 
 
+
+
+        # Fonction de reset de la frame
+        def reset(self) -> None:
+            pass
+
+
 class Reseau():
     """
     Reprend toutes les informations et méthodes de verification/recherche/etc de réseau ou ip. 
@@ -214,7 +306,7 @@ class Reseau():
     - Adresse du Sous Réseau
     """
 
-    def __init__(self, ip, masque, adrReseau) -> None:
+    def __init__(self, ip, masque, adrReseau="0.0.0.0") -> None:
         if (Reseau.ipValide(ip)):
             self.ip = ip
         else:
@@ -230,29 +322,15 @@ class Reseau():
         
         self.adrBroadCast = "0.0.0.0"
         self.adrSR = "0.0.0.0"
-
-    def __init__(self, ip, masque) -> None:
-        if (Reseau.ipValide(ip)):
-            self.ip = ip
-        else:
-            self.ip = "0.0.0.0"
-        if (Reseau.masqueValide(masque)):
-            self.masque = masque
-        else:
-            self.masque = "0.0.0.0"
-        
-        self.adrReseau = "0.0.0.0"
-        self.adrBroadCast = "0.0.0.0"
-        self.adrSR = "0.0.0.0"
         
     def ipValide(ip) -> bool:
-        pass
+        return True
 
     def masqueValide(masque) -> bool:
-        pass
+        return True
     
     def reseauValide(adrReseau) -> bool:
-        pass
+        return True
     
   
 # Start
