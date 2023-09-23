@@ -542,9 +542,11 @@ class Reseau():
             try:
                 # Convert the octet to an integer
                 octet_value = int(octet)
+
                 # Check if the octet is within the valid range [0, 255]
                 if octet_value < 0 or octet_value > 255:
                     return False
+                
                 # Check if the octet is 255 (contiguous 1s)
                 if contiguous_ones:
                     if octet_value != 255:
