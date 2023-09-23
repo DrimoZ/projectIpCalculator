@@ -1,6 +1,8 @@
 from tkinter import *
 import ipaddress
 import webbrowser
+import sqlite3
+import bcrypt
 
 ### GROUPE 5 
 
@@ -8,6 +10,25 @@ PAD_X = 30
 PAD_Y = 30
 SIZE_X = 1000
 SIZE_Y = 560
+
+isConnected = False
+
+def setConnected():
+    global isConnected
+    isConnected = True
+    app.returnButton.config(state= NORMAL, cursor="hand2")
+    app.show_frame(HomePage)
+
+def getConnected():
+    global isConnected
+    return isConnected
+
+def setDisconnected():
+    global isConnected
+    isConnected = False
+    app.returnButton.config(state= DISABLED, cursor="tcross")
+    app.show_frame(Connexion)
+
 
 class MainApplication(Tk):
     """
@@ -28,27 +49,34 @@ class MainApplication(Tk):
         container.grid_columnconfigure(0, weight = 1)
         quitButton = Button(self, text="Quitter l'application", command=self.destroy, cursor="hand2").place(x=SIZE_X-125, y=SIZE_Y-35)
         githubButton = Button(self, text="GitHub", command=self.ouvrir_github, cursor="hand2").place(x=SIZE_X-125-55, y=SIZE_Y-35)
-        returnButton = Button(self, text="Retourner au menu", command=lambda : self.show_frame(HomePage), cursor="hand2").place(x=10, y=SIZE_Y-35)
+
+        self.returnButton = Button(self, text="Retourner au menu", command=lambda : self.show_frame(HomePage))
+        self.returnButton.config(state= DISABLED, cursor="tcross")
+        self.returnButton.place(x=10, y=SIZE_Y-35)
 
         self.frames = {} 
-        for F in (HomePage, Application1, Application2, Application3):
+        for F in (Connexion, HomePage, Application1, Application2, Application3):
   
             frame = F(container, self)
             self.frames[F] = frame
 
             frame.grid(row = 0, column = 0, sticky ="nsew")
-  
-        self.show_frame(HomePage)
+        self.show_frame(Connexion)
   
     # to display the current frame passed as parameter
     def show_frame(self, cont):
-        frame = self.frames[cont]
-        if (not isinstance(frame, HomePage)):
-            frame.reset()
-        frame.tkraise()
+        if (getConnected()):
+            frame = self.frames[cont]
+            if (not isinstance(frame, HomePage) and not isinstance(frame, Connexion)):
+                frame.reset()
+            frame.tkraise()
+        else:
+            frame = self.frames[Connexion]
+            frame.tkraise()
 
     def ouvrir_github(self):
         webbrowser.open("https://github.com/DrimoZ/projectIpCalculator")
+        
   
 # Page d'acceuil
 class HomePage(Frame):
@@ -412,7 +440,7 @@ class Application3(Frame):
         elif (res.adrReseau == "0.0.0.0"):
             self.attStr.set("Adresse Réseau non-valide")
         else:
-            # TODO  : Vérification de l'appartenance de l'ip au réseau
+            # TODO  :  Création des sous-réseaux
             self.repFrame.place(x=330, y=150)
 
     def verifCaracter(self, P):
@@ -468,8 +496,7 @@ class Reseau():
             return False
 
     def masqueValide(masque: str) -> bool:
-        masque = masque.strip().lower()
-        octets = masque.split('.')
+        octets = masque.strip().lower().split('.')
 
         # Check if there are exactly 4 octets
         if len(octets) != 4:
@@ -507,7 +534,134 @@ class Reseau():
     def reseauValide(adrReseau: str) -> bool:
         return True
     
-  
+class Connexion(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+
+        # Frame - Connexion
+        self.inFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        self.inFrame.grid_propagate(0)
+        self.inFrame.config(width=270, height=253)
+
+        # Labels - Connexion
+        labnomC = Label(self.inFrame, text="Connexion", font = 'Times 14 underline' ).grid(row = 0, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        labIdC = Label(self.inFrame, text="Identifiant * : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
+        labPassC = Label(self.inFrame, text="Mot de passe * : ", width=15).grid(row = 3, column = 0, padx = 10, pady = 10)
+
+        # Entries - Connexion
+        self.textIdC = Entry(self.inFrame, width=20)
+        self.textIdC.grid(row = 2, column = 1, pady = 10)
+        self.textPassC = Entry(self.inFrame, width=20, show="*")
+        self.textPassC.grid(row = 3, column = 1, pady = 10)
+
+        # Errors - Connexion
+        self.attStrC = StringVar()
+        self.attStrC.set("")
+        lblVerifC = Label(self.inFrame, textvariable=self.attStrC, justify="center", fg="red")
+        lblVerifC.grid(row = 4, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        # Buttons - Connexion
+        btnCheckC = Button(self.inFrame, text="Se Connecter", cursor="hand2")
+        btnCheckC.config(command= lambda: self.connect())
+        btnCheckC.grid(row = 5, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        self.inFrame.place(x=30, y=30)
+
+        # Frame - Sign Up
+        self.upFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        self.upFrame.grid_propagate(0)
+        self.upFrame.config(width=270, height=253)
+
+        # Labels - Sign Up
+        labPassU = Label(self.upFrame, text="Creation de compte", font = 'Times 14 underline' ).grid(row = 0, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        labIdU = Label(self.upFrame, text="Identifiant * : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
+        labPassU = Label(self.upFrame, text="Mot de passe * : ", width=15).grid(row = 3, column = 0, padx = 10, pady = 10)
+        labPassU = Label(self.upFrame, text="Réécrire le MDP * : ", width=15).grid(row = 4, column = 0, padx = 10, pady = 10)
+
+        # Entries - Sign Up
+        self.textIdU = Entry(self.upFrame, width=20)
+        self.textIdU.grid(row = 2, column = 1, pady = 10)
+        self.textPassU = Entry(self.upFrame, width=20, show="*")
+        self.textPassU.grid(row = 3, column = 1, pady = 10)
+        self.textVerifU = Entry(self.upFrame, width=20, show="*")
+        self.textVerifU.grid(row = 4, column = 1, pady = 10)
+
+        # Errors - Sign Up
+        self.attStrU = StringVar()
+        self.attStrU.set("")
+        lblVerifU = Label(self.upFrame, textvariable=self.attStrU, justify="center", fg="red")
+        lblVerifU.grid(row = 5, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        # Buttons - Sign Up
+        btnCheck = Button(self.upFrame, text="Créer un compte", cursor="hand2")
+        btnCheck.config(command= lambda: self.createAccount())
+        btnCheck.grid(row = 6, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        self.upFrame.place(x=330, y=30)
+
+    def createAccount(self) :
+        userId = self.textIdU.get()
+        userPassword = self.textPassU.get()
+        passwordConfirmation = self.textVerifU.get()
+        
+
+        if (userId == "" or userPassword == "" or passwordConfirmation == ""):
+            self.attStrU.set("(*) Tous les champs sont requis")
+            return
+        
+        if (userPassword != passwordConfirmation):
+            self.attStrU.set("Les mots de passe ne correspondent pas")
+            return
+
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        find_user = ('SELECT * FROM user WHERE username = ?')
+        c.execute(find_user, [(userId)])
+        if c.fetchall():
+            self.attStrU.set("Ce nom d'utilisateur existe déjà")
+            setDisconnected()
+        else:
+            hashed_password = bcrypt.hashpw(userPassword.encode('utf8'), bcrypt.gensalt())
+
+            c.execute("INSERT INTO user (username,password) VALUES (?,?)", (userId, hashed_password))
+            conn.commit()
+            setConnected()
+
+        c.close()
+        conn.close()
+        return
+        
+    def connect(self):
+        userId = self.textIdC.get()
+        userPassword = self.textPassC.get()
+        if (userId == "" or userPassword == ""):
+            self.attStrC.set("(*) Tous les champs sont requis")
+            return
+
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+
+        find_user = ('SELECT * FROM user WHERE username = ?')
+        c.execute(find_user, [(userId)])
+
+        result = c.fetchall()
+        if result:
+            if bcrypt.checkpw(userPassword.encode('utf8'), result[0][2]):
+                self.attStrC.set("Connexion réussie")
+                setConnected()
+
+            else:
+                self.attStrC.set("Mot de passe incorrect")
+
+        else:
+            self.attStrC.set("Nom d'utilisateur incorrect")
+
+        c.close()
+        conn.close()
+        return
+
 # Start
 app = MainApplication()
 app.mainloop()
