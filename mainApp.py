@@ -375,6 +375,8 @@ class Reseau():
 #     print("Valid subnet mask")
 # else:
 #     print("Invalid subnet mask")
+
+
     def reseauValide(adrReseau) -> bool:
         return True
     
