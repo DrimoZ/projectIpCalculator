@@ -1,6 +1,9 @@
 from tkinter import *
 import ipaddress
 import webbrowser
+from PIL import ImageTk, Image
+from urllib.request import Request, urlopen
+from io import BytesIO
 
 ### GROUPE 5 
 
@@ -71,17 +74,28 @@ class HomePage(Frame):
         label.grid(row = 0, column = 0,  columnspan = 3, padx = 10, pady = 10)
 
         list = [
-            ["Application 1", "aelskdbsdoilbkjsdbfjkqswbdfn\n <e<sljd<bfzeoimlwbfdjghzioqermdfbwljgv\n <osurdjlwfxbgs\n sfngxoubjrlsdfxcmiho<sbjl:dwxfc\n fhid os<mlfheoioi\n fhfi hdm<ifnogbd"],
-            ["Application 2", "aelskdbsdoilbkjsdbfjkqswbdfn\n <e<sljd<bfzeoimlwbfdjghzioqermdfbwljgv\n <osurdjlwfxbgs\n sfngxoubjrlsdfxcmiho<sbjl:dwxfc\n fhid os<mlfheoioi\n fhfi hdm<ifnogbd"],
-            ["Application 3", "aelskdbsdoilbkjsdbfjkqswbdfn\n <e<sljd<bfzeoimlwbfdjghzioqermdfbwljgv\n <osurdjlwfxbgs\n sfngxoubjrlsdfxcmiho<sbjl:dwxfc\n fhid os<mlfheoioi\n fhfi hdm<ifnogbd"],
+            ["Application 1", "https://www.aufildemma.com/8894/teinture-pour-le-polyester-idye-poly-rouge.jpg"],
+            ["Application 2", "https://whats-my-ip.org/wp-content/uploads/2021/10/what-is-my-ip-logo.png"],
+            ["Application 3", "https://whats-my-ip.org/wp-content/uploads/2021/10/what-is-my-ip-logo.png"],
         ]
 
         for i in range(0, len(list)):
             self.grid_columnconfigure(i, weight=1)
             frame = Frame(self, highlightbackground="red", highlightthickness=1)
 
+            req = Request(
+                url=list[i][1], 
+                headers={'User-Agent': 'Mozilla/5.0'}
+            )
+            u = urlopen(req)
+            raw_data = u.read()
+            u.close()
 
-            label = Label(frame, text = list[i][1], font = 'Verdana 9', borderwidth=1, relief="solid", justify="center")
+            im = Image.open(BytesIO(raw_data))
+            im = im.resize((200,200),Image.Resampling.LANCZOS)
+            photo = ImageTk.PhotoImage(im)
+
+            label = Label(frame,image=photo, borderwidth=1, relief="solid", justify="center", width=200,height=200)
             label.grid(row = 1, column = 0, padx = 10, pady = 10)
 
             appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid", cursor="hand2")
@@ -379,7 +393,7 @@ class Reseau():
         try:
             ip_object = ipaddress.ip_address(ip)
             octets = ip.strip().lower().split('.')
-            if(octets[0]==127 or octets[0]==0 or octets[0]>=224):
+            if(octets[0]=="127" or octets[0]=="0" or octets[0]>="224"):
                 return False
             return True
         except ValueError:
@@ -424,7 +438,6 @@ class Reseau():
 
     def reseauValide(adrReseau: str) -> bool:
         return True
-    
   
 # Start
 app = MainApplication()
