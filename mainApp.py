@@ -129,12 +129,11 @@ class Application1(Frame):
         labMasque = Label(self.infoFrame, text="Masque SR : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
 
         # Entries
-        self.textIp = Entry(self.infoFrame, width=20)
+        vcmd = (self.register(self.verifCaracter))
+        self.textIp = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
         self.textIp.grid(row = 1, column = 1, pady = 10)
-        self.textIp.insert(0, "0.0.0.0")
-        self.textMasque = Entry(self.infoFrame, width=20)
+        self.textMasque = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
         self.textMasque.grid(row = 2, column = 1, pady = 10)
-        self.textMasque.insert(0, "0.0.0.0")
 
         # Label d'erreur
         self.attStr = StringVar()
@@ -145,7 +144,7 @@ class Application1(Frame):
         # Bouton de vérification
         btnCheck = Button(self.infoFrame, text="Trouver le réseau", cursor="hand2") 
         btnCheck.config(command= lambda: self.trouverReseau())
-        btnCheck.grid(row = 5, column = 1, padx = 10, pady = 10)
+        btnCheck.grid(row = 5, column = 0, columnspan=2, padx = 10, pady = 10)
 
         # Fin de la Frame d'entrée
         self.infoFrame.place(x=30, y=30)
@@ -197,6 +196,12 @@ class Application1(Frame):
             # TODO  : trouver le réseau
             self.repFrame.place(x=330, y=150)
 
+    def verifCaracter(self, P):
+        if str.isdigit(P) or P == "" or P == ".":
+            return True
+        else:
+            return False
+        
     # Fonction de reset de la frame
     def reset(self) -> None:
         self.attStr.set("")
@@ -228,15 +233,13 @@ class Application2(Frame):
         labReseau = Label(self.infoFrame, text="Adresse Réseau * : ", width=15).grid(row = 3, column = 0, padx = 10, pady = 10)
 
         # Entries - Données d'entrée
-        self.textIp = Entry(self.infoFrame, width=20)
+        vcmd = (self.register(self.verifCaracter))
+        self.textIp = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
         self.textIp.grid(row = 1, column = 1, pady = 10)
-        self.textIp.insert(0, "0.0.0.0")
-        self.textMasque = Entry(self.infoFrame, width=20)
+        self.textMasque = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
         self.textMasque.grid(row = 2, column = 1, pady = 10)
-        self.textMasque.insert(0, "0.0.0.0")
-        self.textReseau = Entry(self.infoFrame, width=20)
+        self.textReseau = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
         self.textReseau.grid(row = 3, column = 1, pady = 10)
-        self.textReseau.insert(0, "0.0.0.0")
 
         # Errors - Données d'entrée
         self.attStr = StringVar()
@@ -247,7 +250,7 @@ class Application2(Frame):
         # Buttons - Données d'entrée
         btnCheck = Button(self.infoFrame, text="Verifier l'adresse Ip", cursor="hand2")
         btnCheck.config(command= lambda: self.checkReseau())
-        btnCheck.grid(row = 5, column = 1, padx = 10, pady = 10)
+        btnCheck.grid(row = 5, column = 0, columnspan=2, padx = 10, pady = 10)
 
         # Fin de la Frame d'entrée
         self.infoFrame.place(x=30, y=30)
@@ -303,7 +306,12 @@ class Application2(Frame):
             # TODO  : Vérification de l'appartenance de l'ip au réseau
             self.repFrame.place(x=330, y=150)
         
-
+    def verifCaracter(self, P):
+        if str.isdigit(P) or P == "" or P == ".":
+            return True
+        else:
+            return False
+        
     # Fonction de reset de la frame
     def reset(self) -> None:
         self.attStr.set("")
@@ -338,28 +346,102 @@ class Application3(Frame):
         # Frame - Données d'entrée
         self.infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
         self.infoFrame.grid_propagate(0)
-        self.infoFrame.config(width=270, height=510)
+        self.infoFrame.config(width=270, height=253)
 
         # Labels - Données d'entrée
-        labReseau = Label(self.infoFrame, text="Adresse Réseau * : ", justify="left").grid(row = 1, column = 0, padx = 10, pady = 10)
-        labMasque = Label(self.infoFrame, text="Masque : ", justify="left").grid(row = 2, column = 0, padx = 10, pady = 10)
+        labReseau = Label(self.infoFrame, text="Adresse Réseau * : ", width=15).grid(row = 1, column = 0, padx = 10, pady = 10)
+        labMasque = Label(self.infoFrame, text="Masque SR * : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
+        labSR = Label(self.infoFrame, text="SR souhaités * : ", width=15).grid(row = 3, column = 0, padx = 10, pady = 10)
+        labHotes = Label(self.infoFrame, text="Hôtes par SR * : ", width=15).grid(row = 4, column = 0, padx = 10, pady = 10)
 
+        
+        
         # Entries - Données d'entrée
-        self.textIp = Entry(self.infoFrame, width=25)
-        self.textIp.grid(row = 1, column = 1, padx = 10, pady = 10)
-        self.textIp.insert(0, "0.0.0.0")
-        self.textMasque = Entry(self.infoFrame, width=25)
-        self.textMasque.grid(row = 2, column = 1, padx = 10, pady = 10)
-        self.textMasque.insert(0, "0.0.0.0")
-        self.textReseau = Entry(self.infoFrame, width=25)
-        self.textReseau.grid(row = 3, column = 1, padx = 10, pady = 10)
-        self.textReseau.insert(0, "0.0.0.0")
+        vcmd = (self.register(self.verifCaracter))
+        self.textMasque = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
+        self.textMasque.grid(row = 1, column = 1, pady = 10)
+        self.textReseau = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
+        self.textReseau.grid(row = 2, column = 1, pady = 10)
+        self.textSR = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
+        self.textSR.grid(row = 3, column = 1, pady = 10)
+        self.textHotes = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
+        self.textHotes.grid(row = 4, column = 1, pady = 10)
+
+        # Errors - Données d'entrée
+        self.attStr = StringVar()
+        self.attStr.set("")
+        lblVerif = Label(self.infoFrame, textvariable=self.attStr, justify="center", fg="red")
+        lblVerif.grid(row = 5, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        # Buttons - Données d'entrée
+        btnCheck = Button(self.infoFrame, text="Créer les sous-réseaux", cursor="hand2")
+        btnCheck.config(command= lambda: self.createSR())
+        btnCheck.grid(row = 6, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        # Fin de la Frame d'entrée
+        self.infoFrame.place(x=30, y=30)
+
+        # Frame - Titre
+        titleFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=90)
+        titleFrame.grid_propagate(0)
+        titleFrame.place(x=330, y=30)
+
+        # Labels - Titre
+        lblTitre = Label(titleFrame, text="Application 3 : Création de Sous-Réseaux", font = 'Times 14 underline' )
+        lblTitre.place(x=10, y=10)
+        lblExo = Label(titleFrame, fg='blue', text="Sur base d’une adresse de réseau et d'informations sur les sous-résaux souhaités,\ncrée une une découpe en sous-réseau classique si possible et fournit un plan d'adressage complet.", font = 'Times 11 italic', justify="left" )
+        lblExo.place(x=10, y=40)
 
 
+        # Frame - Réponses
+        self.repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
+        self.repFrame.grid_propagate(0)
 
+        # Labels - Titre
+        self.rep = StringVar()
+        self.rep.set("OUI")
+        lblVerif = Label(self.repFrame, textvariable=self.rep, justify="center", fg="red")
+        lblVerif.place(x=0, y=0)
+
+
+    def createSR(self) -> None :
+        """
+        Récupere Réseau et Données de SR entrés. Crée les sous-réseaux si possible.
+        """
+
+        self.attStr.set("")
+        self.repFrame.place_forget()
+
+        # Un des champs est vide
+        if (self.textReseau.get() == "" or self.textMasque.get() == "" or self.textHotes.get() == "" or self.textSR.get() == ""):
+            self.attStr.set("(*) Tous les champs sont requis")
+            return
+        
+        # Instance de Reseau
+        res = Reseau("0.0.0.0", self.textMasque.get(), self.textReseau.get())
+
+        # Vérification des champs
+        if (res.masque == "0.0.0.0" and self.textMasque.get() != ""):
+            self.attStr.set("Masque Réseau non-valide")
+        elif (res.adrReseau == "0.0.0.0"):
+            self.attStr.set("Adresse Réseau non-valide")
+        else:
+            # TODO  : Vérification de l'appartenance de l'ip au réseau
+            self.repFrame.place(x=330, y=150)
+
+    def verifCaracter(self, P):
+        if str.isdigit(P) or P == "" or P == ".":
+            return True
+        else:
+            return False
+       
     # Fonction de reset de la frame
     def reset(self) -> None:
-        pass
+        self.textMasque.delete(0, END)
+        self.textReseau.delete(0, END)
+        self.textSR.delete(0, END)
+        self.textHotes.delete(0, END)
+        self.repFrame.place_forget()
 
 
 class Reseau():
@@ -442,3 +524,4 @@ class Reseau():
 # Start
 app = MainApplication()
 app.mainloop()
+
