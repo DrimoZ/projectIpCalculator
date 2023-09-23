@@ -376,18 +376,6 @@ class Reseau():
         self.adrSR: str = "0.0.0.0"
         
     def ipValide(ip: str) -> bool:
-        return True
-
-    def masqueValide(masque: str) -> bool:
-        masque = masque.strip().lower()
-        octets = masque.split('.')
-
-        # Check if there are exactly 4 octets
-        if len(octets) != 4:
-            return False
-        
-<<<<<<< HEAD
-    def ipValide(ip) -> bool:
         try:
             ip_object = ipaddress.ip_address(ip)
             octets = ip.strip().lower().split('.')
@@ -397,46 +385,14 @@ class Reseau():
         except ValueError:
             return False
 
-    def masqueValide(masque) -> bool:
-        octets = masque.strip().lower().split('.')
+    def masqueValide(masque: str) -> bool:
+        masque = masque.strip().lower()
+        octets = masque.split('.')
 
         # Check if there are exactly 4 octets
         if len(octets) != 4:
             return False
-
-        # Initialize a flag to track contiguous 1s
-        contiguous_ones = True
-
-        for octet in octets:
-            try:
-                # Convert the octet to an integer
-                octet_value = int(octet)
-
-                # Check if the octet is within the valid range [0, 255]
-                if octet_value < 0 or octet_value > 255:
-                    return False
-
-                # Check if the octet is 255 (contiguous 1s)
-                if contiguous_ones:
-                    if octet_value != 255:
-                        contiguous_ones = False
-                else:
-                    # Check if the octet is 0 (contiguous 0s)
-                    if octet_value != 0:
-                        return False
-            except ValueError:
-                # If an octet is not a valid integer, return False
-                return False
-
-        # Check if there is at least one octet with contiguous 0s
-        if contiguous_ones:
-            return False
-
-        return True
-    
-    def reseauValide(adrReseau) -> bool:
-        pass
-=======
+        
         # Initialize a flag to track contiguous 1s
         contiguous_ones = True
 
@@ -468,7 +424,6 @@ class Reseau():
 
     def reseauValide(adrReseau: str) -> bool:
         return True
->>>>>>> 666f269842f68fa05f330d1743694c9a8d614950
     
   
 # Start
