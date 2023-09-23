@@ -545,6 +545,16 @@ class Reseau():
                 # Check if the octet is 255 (contiguous 1s)
                 if contiguous_ones:
                     if octet_value != 255:
+                        i=1
+                        while(i!=512):
+                            if(256-i!=octet_value):
+                                print(i)
+                                i+=i
+                            else:
+                                print(i)
+                                break
+                        if(i==512):
+                            return False
                         contiguous_ones = False
                 else:
                     # Check if the octet is 0 (contiguous 0s)
@@ -560,6 +570,32 @@ class Reseau():
             return False
         
         return True
+    
+    def convertMasque(masque: str) -> str:
+        octets = masque.strip().lower().split('.')
+        total=0
+        for o in octets:
+            if o == 255:
+                total+=8
+            elif o == 0:
+                pass
+            else:
+                match o:
+                    case 128:
+                        total+=1
+                    case 192:
+                        total+=2
+                    case 224:
+                        total+=3
+                    case 240:
+                        total+=4
+                    case 248:
+                        total+=5
+                    case 252:
+                        total+=6
+                    case 254:
+                        total+=7
+        return "/"+total
 
     def reseauValide(adrReseau: str) -> bool:
         return True
