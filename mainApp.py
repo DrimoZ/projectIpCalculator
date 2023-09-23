@@ -548,10 +548,8 @@ class Reseau():
                         i=1
                         while(i!=512):
                             if(256-i!=octet_value):
-                                print(i)
                                 i+=i
                             else:
-                                print(i)
                                 break
                         if(i==512):
                             return False
