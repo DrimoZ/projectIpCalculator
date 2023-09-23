@@ -21,6 +21,7 @@ def setConnected():
     global isConnected
     isConnected = True
     app.returnButton.config(state= NORMAL, cursor="hand2")
+    app.disconnectButton.config(state= NORMAL, cursor="hand2", command=setDisconnected)
     app.show_frame(HomePage)
 
 def getConnected():
@@ -31,6 +32,7 @@ def setDisconnected():
     global isConnected
     isConnected = False
     app.returnButton.config(state= DISABLED, cursor="tcross")
+    app.disconnectButton.config(state= DISABLED, cursor="tcross")
     app.show_frame(Connexion)
 
 
@@ -54,6 +56,10 @@ class MainApplication(Tk):
         quitButton = Button(self, text="Quitter l'application", command=self.destroy, cursor="hand2").place(x=SIZE_X-125, y=SIZE_Y-35)
         githubButton = Button(self, text="GitHub", command=self.ouvrir_github, cursor="hand2").place(x=SIZE_X-125-55, y=SIZE_Y-35)
 
+        self.disconnectButton = Button(self, text="Se Déconnecter", cursor="hand2")
+        self.disconnectButton.config(state= DISABLED, cursor="tcross")
+        self.disconnectButton.place(x=130, y=SIZE_Y-35)
+
         self.returnButton = Button(self, text="Retourner au menu", command=lambda : self.show_frame(HomePage))
         self.returnButton.config(state= DISABLED, cursor="tcross")
         self.returnButton.place(x=10, y=SIZE_Y-35)
@@ -71,11 +77,12 @@ class MainApplication(Tk):
     def show_frame(self, cont):
         if (getConnected()):
             frame = self.frames[cont]
-            if (not isinstance(frame, HomePage) and not isinstance(frame, Connexion)):
+            if (not isinstance(frame, HomePage)):
                 frame.reset()
             frame.tkraise()
         else:
             frame = self.frames[Connexion]
+            frame.reset()
             frame.tkraise()
 
     def ouvrir_github(self):
@@ -648,7 +655,6 @@ class Connexion(Frame):
         c.execute(find_user, [(userId)])
         if c.fetchall():
             self.attStrU.set("Ce nom d'utilisateur existe déjà")
-            setDisconnected()
         else:
             hashed_password = bcrypt.hashpw(userPassword.encode('utf8'), bcrypt.gensalt())
 
@@ -688,7 +694,15 @@ class Connexion(Frame):
         c.close()
         conn.close()
         return
-    
+
+    def reset(self):
+        self.textIdC.delete(0, END)
+        self.textPassC.delete(0, END)
+        self.textIdU.delete(0, END)
+        self.textPassU.delete(0, END)
+        self.textVerifU.delete(0, END)
+        self.attStrC.set("")
+        self.attStrU.set("")
 
 # Start
 app = MainApplication()
