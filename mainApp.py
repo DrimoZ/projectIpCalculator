@@ -238,7 +238,8 @@ class Application1(Frame):
             # TODO  : trouver le réseau
             self.rep.set("  Adresse IP  : "+res.ip+"\n\
                             Masque de réseau : "+res.masque+"\n\
-                            Adresse de réseau : "+str(ipaddress.ip_interface(res.ip+Reseau.convertMasque(res.masque)).network)+"\n\
+                            Adresse de réseau : "+"\n\
+                            # +str(ipaddress.ip_interface(res.ip+Reseau.convertMasque(res.masque)).network)+
                             Adresse de broadcast : "+res.masque)
             # IPv4Network('192.0.2.0/24')
             self.repFrame.place(x=330, y=150)
