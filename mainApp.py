@@ -1,4 +1,6 @@
+from tkinter import ttk
 from tkinter import *
+
 import ipaddress
 import webbrowser
 import sqlite3
@@ -398,7 +400,7 @@ class Application3(Frame):
 
         # Labels - Données d'entrée
         labReseau = Label(self.infoFrame, text="Adresse Réseau * : ", width=15).grid(row = 1, column = 0, padx = 10, pady = 10)
-        labMasque = Label(self.infoFrame, text="Masque SR * : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
+        labMasque = Label(self.infoFrame, text="Masque SR : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
         labSR = Label(self.infoFrame, text="SR souhaités * : ", width=15).grid(row = 3, column = 0, padx = 10, pady = 10)
         labHotes = Label(self.infoFrame, text="Hôtes par SR * : ", width=15).grid(row = 4, column = 0, padx = 10, pady = 10)
 
@@ -406,10 +408,10 @@ class Application3(Frame):
         
         # Entries - Données d'entrée
         vcmd = (self.register(self.verifCaracter))
-        self.textMasque = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
-        self.textMasque.grid(row = 1, column = 1, pady = 10)
         self.textReseau = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
-        self.textReseau.grid(row = 2, column = 1, pady = 10)
+        self.textReseau.grid(row = 1, column = 1, pady = 10)
+        self.textMasque = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
+        self.textMasque.grid(row = 2, column = 1, pady = 10)
         self.textSR = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
         self.textSR.grid(row = 3, column = 1, pady = 10)
         self.textHotes = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
@@ -461,7 +463,7 @@ class Application3(Frame):
         self.repFrame.place_forget()
 
         # Un des champs est vide
-        if (self.textReseau.get() == "" or self.textMasque.get() == "" or self.textHotes.get() == "" or self.textSR.get() == ""):
+        if (self.textReseau.get() == "" or self.textHotes.get() == "" or self.textSR.get() == ""):
             self.attStr.set("(*) Tous les champs sont requis")
             return
         
@@ -476,6 +478,48 @@ class Application3(Frame):
         else:
             # TODO  :  Création des sous-réseaux
             self.repFrame.place(x=330, y=150)
+
+            #define the table with tkinter
+            table = ttk.Treeview(self.repFrame, columns=('N°', 'Sous-Réseau', 'Masque', 'Plage', 'Broadcast', 'Hôtes'))
+            table.heading('#0', text='N°')
+            table.heading('#1', text='Sous-Réseau')
+            table.heading('#2', text='Masque')
+            table.heading('#3', text='Plage')
+            table.heading('#4', text='Broadcast')
+            table.heading('#5', text='Hôtes')
+            table.column('#0', stretch=YES, minwidth=0, width=100)
+            table.column('#1', stretch=YES, minwidth=0, width=100)
+            table.column('#2', stretch=YES, minwidth=0, width=100)
+            table.column('#3', stretch=YES, minwidth=0, width=100)
+            table.column('#4', stretch=YES, minwidth=0, width=100)
+            table.column('#5', stretch=YES, minwidth=0, width=100)
+            table.grid(row=0, column=0, sticky='nsew')
+            #add a scrollbar to the table
+            scrollbar = Scrollbar(self.repFrame, orient=VERTICAL, command=table.yview)
+            table.configure(yscroll=scrollbar.set)
+            scrollbar.grid(row=0, column=1, sticky='ns')
+
+            #add data to the table
+            table.insert(parent='', index='end', iid=0, text='1', values=('SR1', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=1, text='2', values=('SR2', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=2, text='3', values=('SR3', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=3, text='4', values=('SR4', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=4, text='5', values=('SR5', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=5, text='6', values=('SR6', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=6, text='7', values=('SR7', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=7, text='8', values=('SR8', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=8, text='9', values=('SR9', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=9, text='10', values=('SR10', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=10, text='11', values=('SR11', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=11, text='12', values=('SR12', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=12, text='13', values=('SR13', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=13, text='14', values=('SR14', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=14, text='15', values=('SR15', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=15, text='16', values=('SR16', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=16, text='17', values=('SR17', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=17, text='18', values=('SR18', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=18, text='19', values=('SR19', '', '', '', '', ''))
+            table.insert(parent='', index='end', iid=19, text='20', values=('SR20', '', '', '', '', ''))
 
     def verifCaracter(self, P):
         if str.isdigit(P) or P == "" or P == ".":
@@ -518,6 +562,8 @@ class Reseau():
         
         self.adrBroadCast: str = "0.0.0.0"
         self.adrSR: str = "0.0.0.0"
+
+        print(self.ip, self.masque, self.adrReseau, self.adrBroadCast, self.adrSR)
         
     def ipValide(ip: str) -> bool:
         try:
