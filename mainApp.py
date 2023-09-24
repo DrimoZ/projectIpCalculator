@@ -169,8 +169,10 @@ class Application1(Frame):
         self.infoFrame.config(width=270, height=170)
 
         # Labels
-        labIp = Label(self.infoFrame, text="Adresse Ip * : ", width=15).grid(row = 1, column = 0, padx = 10, pady = 10)
-        labMasque = Label(self.infoFrame, text="Masque SR : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
+        labIp = Label(self.infoFrame, text="Adresse Ip * : ", width=15)
+        labIp.grid(row = 1, column = 0, padx = 10, pady = 10)
+        labMasque = Label(self.infoFrame, text="Masque SR : ", width=15)
+        labMasque.grid(row = 2, column = 0, padx = 10, pady = 10)
 
         # Entries
         vcmd = (self.register(self.verifCaracter))
@@ -209,15 +211,9 @@ class Application1(Frame):
         self.repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
         self.repFrame.grid_propagate(0)
 
-        rep = StringVar()
-        res = Reseau(self.textIp.get(), self.textMasque.get())
-        rep.set("Adresse de réseau  :"+ res.ip+"\n\
-                Adresse de broadcast :"+ res.masque)
-        lblVerif = Label(self.repFrame, textvariable=rep, justify="center", fg="red")
+        self.rep = StringVar()
+        lblVerif = Label(self.repFrame, textvariable=self.rep, justify="center", fg="red")
         lblVerif.place(x=0, y=0)
-
-    
-
 
     def trouverReseau(self) -> None :
         """
@@ -242,6 +238,11 @@ class Application1(Frame):
             self.attStr.set("Masque Réseau non-valide")
         else:
             # TODO  : trouver le réseau
+            self.rep.set("  Adresse IP  : "+res.ip+"\n\
+                            Masque de réseau : "+res.masque+"\n\
+                            Adresse de réseau : "+str(ipaddress.ip_interface(res.ip+Reseau.convertMasque(res.masque)).network)+"\n\
+                            Adresse de broadcast : "+res.masque)
+            # IPv4Network('192.0.2.0/24')
             self.repFrame.place(x=330, y=150)
 
     def verifCaracter(self, P):
@@ -643,7 +644,7 @@ class Reseau():
                         total+=6
                     case 254:
                         total+=7
-        return "/"+total
+        return "/"+str(total)
             
     def reseauValide(adrReseau: str) -> bool:
         return True
