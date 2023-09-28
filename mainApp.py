@@ -3,6 +3,7 @@ import ipaddress
 import webbrowser
 import sqlite3
 import bcrypt
+import os
 
 from PIL import ImageTk, Image
 import requests
@@ -110,24 +111,18 @@ class HomePage(Frame):
         label.grid(row = 0, column = 0,  columnspan = 3, padx = 10, pady = 10)
 
         list = [
-            ["Application 1", "https://www.aufildemma.com/8894/teinture-pour-le-polyester-idye-poly-rouge.jpg"],
-            ["Application 2", "https://whats-my-ip.org/wp-content/uploads/2021/10/what-is-my-ip-logo.png"],
-            ["Application 3", "https://whats-my-ip.org/wp-content/uploads/2021/10/what-is-my-ip-logo.png"],
+            ["Application 1", "IPFinder.png"],
+            ["Application 2", "IPFinder.png"],
+            ["Application 3", "IPFinder.png"],
         ]
 
         for i in range(0, len(list)):
             self.grid_columnconfigure(i, weight=1)
             frame = Frame(self, highlightbackground="red", highlightthickness=1)
 
-
-            url=list[i][1]
-
-            # Fetch the image from the URL
-            response = requests.get(url)
-            img_data = response.content
-
             # Convert the image data into a PIL Image
-            img = Image.open(BytesIO(img_data))
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            img = Image.open(os.path.join(current_dir, "Image", list[i][1]))
 
             # Create a Tkinter PhotoImage object from the PIL Image
             img_tk = ImageTk.PhotoImage(img)
