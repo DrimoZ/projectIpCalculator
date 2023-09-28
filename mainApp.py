@@ -1,4 +1,6 @@
+from tkinter import ttk
 from tkinter import *
+
 import ipaddress
 import webbrowser
 import sqlite3
@@ -167,8 +169,10 @@ class Application1(Frame):
         self.infoFrame.config(width=270, height=170)
 
         # Labels
-        labIp = Label(self.infoFrame, text="Adresse Ip * : ", width=15).grid(row = 1, column = 0, padx = 10, pady = 10)
-        labMasque = Label(self.infoFrame, text="Masque SR : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
+        labIp = Label(self.infoFrame, text="Adresse Ip * : ", width=15)
+        labIp.grid(row = 1, column = 0, padx = 10, pady = 10)
+        labMasque = Label(self.infoFrame, text="Masque SR : ", width=15)
+        labMasque.grid(row = 2, column = 0, padx = 10, pady = 10)
 
         # Entries
         vcmd = (self.register(self.verifCaracter))
@@ -207,11 +211,9 @@ class Application1(Frame):
         self.repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
         self.repFrame.grid_propagate(0)
 
-        rep = StringVar()
-        rep.set("OUI")
-        lblVerif = Label(self.repFrame, textvariable=rep, justify="center", fg="red")
+        self.rep = StringVar()
+        lblVerif = Label(self.repFrame, textvariable=self.rep, justify="center", fg="red")
         lblVerif.place(x=0, y=0)
-
 
     def trouverReseau(self) -> None :
         """
@@ -235,7 +237,9 @@ class Application1(Frame):
         elif (res.masque == "0.0.0.0" and self.textMasque.get() != ""):
             self.attStr.set("Masque Réseau non-valide")
         else:
-            # TODO  : trouver le réseau
+            host = ipaddress.IPv4Address(res.ip)
+            net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
+            self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{ipaddress.IPv4Address(int(host) & int(net.netmask)):s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
             self.repFrame.place(x=330, y=150)
 
     def verifCaracter(self, P):
@@ -388,11 +392,11 @@ class Application3(Frame):
         # Frame - Données d'entrée
         self.infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
         self.infoFrame.grid_propagate(0)
-        self.infoFrame.config(width=270, height=253)
+        self.infoFrame.config(width=270, height=250)
 
         # Labels - Données d'entrée
         labReseau = Label(self.infoFrame, text="Adresse Réseau * : ", width=15).grid(row = 1, column = 0, padx = 10, pady = 10)
-        labMasque = Label(self.infoFrame, text="Masque SR * : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
+        labMasque = Label(self.infoFrame, text="Masque SR : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
         labSR = Label(self.infoFrame, text="SR souhaités * : ", width=15).grid(row = 3, column = 0, padx = 10, pady = 10)
         labHotes = Label(self.infoFrame, text="Hôtes par SR * : ", width=15).grid(row = 4, column = 0, padx = 10, pady = 10)
 
@@ -400,10 +404,10 @@ class Application3(Frame):
         
         # Entries - Données d'entrée
         vcmd = (self.register(self.verifCaracter))
-        self.textMasque = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
-        self.textMasque.grid(row = 1, column = 1, pady = 10)
         self.textReseau = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
-        self.textReseau.grid(row = 2, column = 1, pady = 10)
+        self.textReseau.grid(row = 1, column = 1, pady = 10)
+        self.textMasque = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
+        self.textMasque.grid(row = 2, column = 1, pady = 10)
         self.textSR = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
         self.textSR.grid(row = 3, column = 1, pady = 10)
         self.textHotes = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
@@ -453,10 +457,25 @@ class Application3(Frame):
 
         self.attStr.set("")
         self.repFrame.place_forget()
+        if hasattr(self, 'tableFrame'):
+            self.tableFrame.place_forget()
 
-        # Un des champs est vide
-        if (self.textReseau.get() == "" or self.textMasque.get() == "" or self.textHotes.get() == "" or self.textSR.get() == ""):
-            self.attStr.set("(*) Tous les champs sont requis")
+        #en fonction du nombre de champs requis, on redimensionne la frame
+        if (self.textReseau.get() == "" and self.textSR.get() == "" and self.textHotes.get() == ""):
+            self.infoFrame.config(height=300)
+        elif (self.textReseau.get() == "" and self.textSR.get() == ""):
+            self.infoFrame.config(height=290)
+        elif (self.textReseau.get() == "" and self.textHotes.get() == ""):
+            self.infoFrame.config(height=290)
+        elif (self.textSR.get() == "" and self.textHotes.get() == ""):
+            self.infoFrame.config(height=290)
+        elif (self.textReseau.get() == "" or self.textSR.get() == "" or self.textHotes.get() == ""):
+            self.infoFrame.config(height=270)
+        else:
+            self.infoFrame.config(height=250)
+
+        if (self.textReseau.get() == "" or self.textSR.get() == "" or self.textHotes.get() == ""):
+            self.attStr.set("(*) Champs requis : \n" + ("Adresse de réseau" if self.textReseau.get() == "" else "") + ("\n" if self.textReseau.get() == "" and self.textSR.get() == "" else "") + ("Nombre de SR souhaités" if self.textSR.get() == "" else "") + ("\n" if self.textSR.get() == "" and self.textHotes.get() == "" else "") + ("Nombre d'Hôtes par SR" if self.textHotes.get() == "" else ""))
             return
         
         # Instance de Reseau
@@ -471,6 +490,44 @@ class Application3(Frame):
             # TODO  :  Création des sous-réseaux
             self.repFrame.place(x=330, y=150)
 
+
+            #define a frame that will contian the table and scrollbar
+            self.tableFrame = Frame(self, width=600, height=150)
+            self.tableFrame.grid_propagate(0)
+
+            #define the table with tkinter
+            self.table = ttk.Treeview(self.tableFrame, column=('Sous-Réseau', 'Masque', 'Plage', 'Broadcast', 'Hôtes'), show="headings", height=6)
+            self.table.heading('#1', text='Sous-Réseau')
+            self.table.heading('#2', text='Masque')
+            self.table.heading('#3', text='Plage')
+            self.table.heading('#4', text='Broadcast')
+            self.table.heading('#5', text='Hôtes')
+
+            self.table.column('#0', minwidth=0, width=0, stretch=False)
+            self.table.column('#1', stretch=False, minwidth=100, width=100, anchor=CENTER)
+            self.table.column('#2', stretch=False, minwidth=100, width=100, anchor=CENTER)
+            self.table.column('#3', stretch=False, minwidth=200, width=200, anchor=CENTER)
+            self.table.column('#4', stretch=False, minwidth=100, width=100, anchor=CENTER)
+            self.table.column('#5', stretch=False, minwidth=100, width=100, anchor=CENTER)
+            
+            self.table.grid(row=0, column=0)
+            
+            scrollbar = Scrollbar(self.tableFrame, orient=VERTICAL, command=self.table.yview)
+            self.table.configure(yscroll=scrollbar.set)
+            scrollbar.grid(row=0, column=1)
+
+            self.tableFrame.place(x=340, y=200)
+
+            def handle_click(event):
+                if self.table.identify_region(event.x, event.y) == "separator":
+                    return "break"
+            self.table.bind('<Button-1>', handle_click)
+
+            #add data to the table
+
+            for i in range(0, 25):
+                self.table.insert(parent='', index='end', iid=i, text= f'{i+1}', values=(f'SR {i+1}', '255.255.255.255', '255.255.255.255 / 255.255.255.255', '255.255.255.255', '100000000'))
+            
     def verifCaracter(self, P):
         if str.isdigit(P) or P == "" or P == ".":
             return True
@@ -479,11 +536,16 @@ class Application3(Frame):
        
     # Fonction de reset de la frame
     def reset(self) -> None:
+        self.attStr.set("")
         self.textMasque.delete(0, END)
         self.textReseau.delete(0, END)
         self.textSR.delete(0, END)
         self.textHotes.delete(0, END)
         self.repFrame.place_forget()
+
+        if hasattr(self, 'tableFrame'):
+            self.tableFrame.place_forget()
+
 
 
 class Reseau():
@@ -512,10 +574,12 @@ class Reseau():
         
         self.adrBroadCast: str = "0.0.0.0"
         self.adrSR: str = "0.0.0.0"
+
+        print(self.ip, self.masque, self.adrReseau, self.adrBroadCast, self.adrSR)
         
     def ipValide(ip: str) -> bool:
         try:
-            ip_object = ipaddress.ip_address(ip)
+            ip_object = ipaddress.ip_address(ip) 
             octets = ip.strip().lower().split('.')
             if(octets[0]=="127" or octets[0]=="0" or octets[0]>="224"):
                 return False
@@ -545,6 +609,14 @@ class Reseau():
                 # Check if the octet is 255 (contiguous 1s)
                 if contiguous_ones:
                     if octet_value != 255:
+                        i=1
+                        while(i!=512):
+                            if(256-i!=octet_value):
+                                i+=i
+                            else:
+                                break
+                        if(i==512):
+                            return False
                         contiguous_ones = False
                 else:
                     # Check if the octet is 0 (contiguous 0s)
@@ -561,6 +633,32 @@ class Reseau():
         
         return True
 
+    def convertMasque(masque: str) -> str:
+        octets = masque.strip().lower().split('.')
+        total=0
+        for o in octets:
+            if o == 255:
+                total+=8
+            elif o == 0:
+                pass
+            else:
+                match o:
+                    case 128:
+                        total+=1
+                    case 192:
+                        total+=2
+                    case 224:
+                        total+=3
+                    case 240:
+                        total+=4
+                    case 248:
+                        total+=5
+                    case 252:
+                        total+=6
+                    case 254:
+                        total+=7
+        return "/"+str(total)
+            
     def reseauValide(adrReseau: str) -> bool:
         return True
     
