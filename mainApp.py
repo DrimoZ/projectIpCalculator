@@ -235,8 +235,8 @@ class Application1(Frame):
             self.attStr.set("Masque Réseau non-valide")
         else:
             host = ipaddress.IPv4Address(res.ip)
-            net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
-            self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{ipaddress.IPv4Address(int(host) & int(net.netmask)):s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
+            # net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
+            self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{net.network_address:s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
             self.repFrame.place(x=330, y=150)
 
     def verifCaracter(self, P):
@@ -259,7 +259,7 @@ class Application1(Frame):
 class Application2(Frame):
     """
     Sur base d’une adresse IP et de son masque et d’une adresse de réseau, le 
-    programme doit déterminer si l’IP appartient au réseau ou pas. 
+    programme doit déterminer si l’IP appartient au réseau ou pas. CLASSFULL
     """
 
     def __init__(self, parent, controller):
@@ -346,7 +346,9 @@ class Application2(Frame):
         elif (res.adrReseau == "0.0.0.0"):
             self.attStr.set("Adresse Réseau non-valide")
         else:
-            # TODO  : Vérification de l'appartenance de l'ip au réseau
+            host = ipaddress.IPv4Address(res.ip)
+            net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
+            self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{net.network_address:s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
             self.repFrame.place(x=330, y=150)
         
     def verifCaracter(self, P):
@@ -555,15 +557,24 @@ class Reseau():
     - Adresse du Sous Réseau
     """
 
-    def __init__(self, ip: str, masque: str = "-1", adrReseau: str = "0.0.0.0") -> None:
+    def __init__(self, ip: str, masque: str, adrReseau: str = "0.0.0.0") -> None:
         if (Reseau.ipValide(ip)):
             self.ip: str = ip
         else:
             self.ip: str = "0.0.0.0"
-        if (Reseau.masqueValide(masque)):
-            self.masque: str = masque
+
+        if(masque==""):
+            octets = ip.strip().lower().split('.')
+            if(octets[0]<"127"):
+                self.masque="255.0.0.0"
+            elif(octets[0]<"192"):
+                self.masque="255.255.0.0"
+            else:
+                self.masque="255.255.255.0"
         else:
-            self.masque: str = "0.0.0.0"
+            if (not Reseau.masqueValide(self, masque)):
+                self.masque: str = "0.0.0.0"
+
         if (Reseau.reseauValide(adrReseau)):
             self.adrReseau: str = adrReseau
         else:
@@ -572,7 +583,7 @@ class Reseau():
         self.adrBroadCast: str = "0.0.0.0"
         self.adrSR: str = "0.0.0.0"
 
-        print(self.ip, self.masque, self.adrReseau, self.adrBroadCast, self.adrSR)
+        # print(self.ip, self.masque, self.adrReseau, self.adrBroadCast, self.adrSR)
         
     def ipValide(ip: str) -> bool:
         try:
@@ -584,7 +595,7 @@ class Reseau():
         except ValueError:
             return False
 
-    def masqueValide(masque: str) -> bool:
+    def masqueValide(self, masque: str) -> bool:
         octets = masque.strip().lower().split('.')
 
         # Check if there are exactly 4 octets
@@ -628,6 +639,25 @@ class Reseau():
         if contiguous_ones:
             return False
         
+        octetsIP = self.ip.strip().lower().split('.')
+        octets = masque.strip().lower().split('.')
+        if(octetsIP[0]<"127"):
+            if(octets[0]=="255"):
+                self.masque: str = masque
+            else:
+                return False
+        elif(octetsIP[0]<"192"):
+            if(octets[1]=="255"):
+                self.masque: str = masque
+            else:
+                return False
+            
+        else:
+            if(octets[2]=="255"):
+                self.masque: str = masque
+            else:
+                return False
+                   
         return True
 
     def convertMasque(masque: str) -> str:
