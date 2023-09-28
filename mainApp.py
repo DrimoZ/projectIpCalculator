@@ -453,6 +453,7 @@ class Application3(Frame):
         """
 
         self.attStr.set("")
+        self.repFrame.place(x=330, y=150)
         self.repFrame.place_forget()
         if hasattr(self, 'tableFrame'):
             self.tableFrame.place_forget()
@@ -484,9 +485,30 @@ class Application3(Frame):
         elif (res.adrReseau == "0.0.0.0"):
             self.attStr.set("Adresse Réseau non-valide")
         else:
-            # TODO  :  Création des sous-réseaux
-            self.repFrame.place(x=330, y=150)
+            # find the number of hosts possible with the given network and mask
+            net = ipaddress.IPv4Network(res.adrReseau + '/' + res.masque, False)
+            nbHotes = net.num_addresses - 2
 
+            # Déterminer s’il sera possible ou pas de réaliser une découpe 
+            # classique sur base du nombre de SR. Si la réponse est oui, le 
+            # programme devra fournir le plan d’adressage complet de la 
+            # découpe demandée. Il devra également indiquer combien de SR on 
+            # peut avoir au maximum dans cette découpe
+
+            # Calculer le masque de sous-réseau approprié pour le nombre de sous-réseaux
+            subnet_mask_length = net.prefixlen + int(self.textSR.get()).bit_length() - 1
+            if subnet_mask_length > 32:
+                print("Nombre de sous-réseaux souhaité trop élevé pour l'adresse IP donnée.")
+            else:
+                subnet = net.subnets(new_prefix=subnet_mask_length)
+                subnets_list = list(subnet)
+
+                # Afficher les informations sur les sous-réseaux créés
+                print(f"Adresse IP d'origine : {net.network_address}/{net.prefixlen}")
+                print(f"Masque de sous-réseau pour {int(self.textSR.get())} sous-réseaux : /{subnet_mask_length}")
+
+                for i, sub in enumerate(subnets_list):
+                    print(f"Sous-réseau {i+1} : {sub.network_address}/{subnet_mask_length}")
 
             #define a frame that will contian the table and scrollbar
             self.tableFrame = Frame(self, width=600, height=150)
@@ -525,6 +547,22 @@ class Application3(Frame):
             for i in range(0, 25):
                 self.table.insert(parent='', index='end', iid=i, text= f'{i+1}', values=(f'SR {i+1}', '255.255.255.255', '255.255.255.255 / 255.255.255.255', '255.255.255.255', '100000000'))
             
+
+
+
+
+
+
+
+
+
+
+            self.repFrame.place(x=330, y=150)
+
+
+
+
+
     def verifCaracter(self, P):
         if str.isdigit(P) or P == "" or P == ".":
             return True
