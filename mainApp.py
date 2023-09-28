@@ -558,7 +558,7 @@ class Reseau():
     - Adresse du Sous Réseau
     """
 
-    def __init__(self, ip: str, masque: str, adrReseau: str = "0.0.0.0") -> None:
+    def __init__(self, ip: str, masque: str = "-1", adrReseau: str = "0.0.0.0") -> None:
         if (Reseau.ipValide(ip)):
             self.ip: str = ip
         else:
