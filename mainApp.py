@@ -7,8 +7,6 @@ import sqlite3
 import bcrypt
 import os
 
-from PIL import ImageTk, Image
-import requests
 from io import BytesIO
 
 ### GROUPE 5 
