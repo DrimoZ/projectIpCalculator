@@ -6,6 +6,7 @@ import webbrowser
 import sqlite3
 import bcrypt
 import os
+from PIL import ImageTk, Image
 
 ### GROUPE 5 
 
