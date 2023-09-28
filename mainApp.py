@@ -235,7 +235,7 @@ class Application1(Frame):
             self.attStr.set("Masque Réseau non-valide")
         else:
             host = ipaddress.IPv4Address(res.ip)
-            # net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
+            net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
             self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{net.network_address:s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
             self.repFrame.place(x=330, y=150)
 
