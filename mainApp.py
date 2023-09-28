@@ -7,12 +7,6 @@ import sqlite3
 import bcrypt
 import os
 
-<<<<<<< HEAD
-from io import BytesIO
-=======
-from PIL import ImageTk, Image
->>>>>>> a7ad9fcae5efeae1ce3f26dd176c797930b17e97
-
 ### GROUPE 5 
 
 PAD_X = 30
