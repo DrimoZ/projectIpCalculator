@@ -617,13 +617,12 @@ class Reseau():
                 self.masque: str = "0.0.0.0"
 
         if (Reseau.reseauValide(adrReseau)):
-            print("test1")
+            
             net = ipaddress.IPv4Network(self.ip + '/' + self.masque, False)
+            print("ip : "+self.ip+"\nMasque : "+self.masque+"\nAdresse : "+f'{net.network_address:s}')
             if(adrReseau==f'{net.network_address:s}'):
-                print("test2")
                 self.adrReseau: str = adrReseau
             else:
-                print("test3")
                 self.adrReseau:str = "NON"
         else:
             self.adrReseau: str = "0.0.0.0"
@@ -635,10 +634,14 @@ class Reseau():
         
     def ipValide(ip: str) -> bool:
         try:
+            print("AAAAA  "+ip)
             ip_object = ipaddress.ip_address(ip) 
             octets = ip.strip().lower().split('.')
-            if(octets[0]=="127" or octets[0]=="0" or octets[0]>="224"):
+            print("BBBBBBBBBB    " + octets[0])
+            if(octets[0]=="127" or octets[0]=="0"):
+                #  or octets[0]>="224"                //54 plus grand que 224 ???? fait un mauvais masque + ip a cause du calcul 54>=224 qui renvoit true
                 return False
+            print("CCCCCCCCCCCCCCCC    " + octets[0])
             return True
         except ValueError:
             return False
