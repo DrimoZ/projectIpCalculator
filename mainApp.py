@@ -345,10 +345,13 @@ class Application2(Frame):
             self.attStr.set("Masque Réseau non-valide")
         elif (res.adrReseau == "0.0.0.0"):
             self.attStr.set("Adresse Réseau non-valide")
+        elif (res.adrReseau == "NON"):
+            self.rep.set("Pas dans le même réseau")
+            self.repFrame.place(x=330, y=150)
         else:
-            host = ipaddress.IPv4Address(res.ip)
             net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
-            self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{net.network_address:s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
+            # self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{net.network_address:s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
+            self.rep.set("L'adresse IP appartient bien au même réseau")
             self.repFrame.place(x=330, y=150)
         
     def verifCaracter(self, P):
@@ -614,7 +617,14 @@ class Reseau():
                 self.masque: str = "0.0.0.0"
 
         if (Reseau.reseauValide(adrReseau)):
-            self.adrReseau: str = adrReseau
+            print("test1")
+            net = ipaddress.IPv4Network(self.ip + '/' + self.masque, False)
+            if(adrReseau==f'{net.network_address:s}'):
+                print("test2")
+                self.adrReseau: str = adrReseau
+            else:
+                print("test3")
+                self.adrReseau:str = "NON"
         else:
             self.adrReseau: str = "0.0.0.0"
         
