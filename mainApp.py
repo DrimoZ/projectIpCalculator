@@ -606,9 +606,9 @@ class Reseau():
 
         if(masque==""):
             octets = ip.strip().lower().split('.')
-            if(octets[0]<"127"):
+            if(int(octets[0])<127):
                 self.masque="255.0.0.0"
-            elif(octets[0]<"192"):
+            elif(int(octets[0])<192):
                 self.masque="255.255.0.0"
             else:
                 self.masque="255.255.255.0"
@@ -637,11 +637,9 @@ class Reseau():
             print("AAAAA  "+ip)
             ip_object = ipaddress.ip_address(ip) 
             octets = ip.strip().lower().split('.')
-            print("BBBBBBBBBB    " + octets[0])
-            if(octets[0]=="127" or octets[0]=="0"):
+            if(int(octets[0])==127 or int(octets[0])==0):
                 #  or octets[0]>="224"                //54 plus grand que 224 ???? fait un mauvais masque + ip a cause du calcul 54>=224 qui renvoit true
                 return False
-            print("CCCCCCCCCCCCCCCC    " + octets[0])
             return True
         except ValueError:
             return False
@@ -692,19 +690,19 @@ class Reseau():
         
         octetsIP = self.ip.strip().lower().split('.')
         octets = masque.strip().lower().split('.')
-        if(octetsIP[0]<"127"):
-            if(octets[0]=="255"):
+        if(int(octetsIP[0])<127):
+            if(int(octets[0])==255):
                 self.masque: str = masque
             else:
                 return False
-        elif(octetsIP[0]<"192"):
-            if(octets[1]=="255"):
+        elif(int(octetsIP[0])<192):
+            if(int(octets[1])==255):
                 self.masque: str = masque
             else:
                 return False
             
         else:
-            if(octets[2]=="255"):
+            if(int(octets[2])==255):
                 self.masque: str = masque
             else:
                 return False
