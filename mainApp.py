@@ -619,7 +619,10 @@ class Reseau():
         if (Reseau.reseauValide(adrReseau)):
             
             net = ipaddress.IPv4Network(self.ip + '/' + self.masque, False)
-            print("ip : "+self.ip+"\nMasque : "+self.masque+"\nAdresse : "+f'{net.network_address:s}')
+
+# 
+            # 
+            # print("ip : "+self.ip+"\nMasque : "+self.masque+"\nAdresse : "+f'{net.network_address:s}')
             if(adrReseau==f'{net.network_address:s}'):
                 self.adrReseau: str = adrReseau
             else:
@@ -629,8 +632,6 @@ class Reseau():
         
         self.adrBroadCast: str = "0.0.0.0"
         self.adrSR: str = "0.0.0.0"
-
-        # print(self.ip, self.masque, self.adrReseau, self.adrBroadCast, self.adrSR)
         
     def ipValide(ip: str) -> bool:
         try:
