@@ -709,31 +709,31 @@ class Reseau():
                    
         return True
 
-    def convertMasque(masque: str) -> str:
-        octets = masque.strip().lower().split('.')
-        total=0
-        for o in octets:
-            if o == 255:
-                total+=8
-            elif o == 0:
-                pass
-            else:
-                match o:
-                    case 128:
-                        total+=1
-                    case 192:
-                        total+=2
-                    case 224:
-                        total+=3
-                    case 240:
-                        total+=4
-                    case 248:
-                        total+=5
-                    case 252:
-                        total+=6
-                    case 254:
-                        total+=7
-        return "/"+str(total)
+    # def convertMasque(masque: str) -> str:
+    #     octets = masque.strip().lower().split('.')
+    #     total=0
+    #     for o in octets:
+    #         if o == 255:
+    #             total+=8
+    #         elif o == 0:
+    #             pass
+    #         else:
+    #             match o:
+    #                 case 128:
+    #                     total+=1
+    #                 case 192:
+    #                     total+=2
+    #                 case 224:
+    #                     total+=3
+    #                 case 240:
+    #                     total+=4
+    #                 case 248:
+    #                     total+=5
+    #                 case 252:
+    #                     total+=6
+    #                 case 254:
+    #                     total+=7
+    #     return "/"+str(total)
             
     def reseauValide(adrReseau: str) -> bool:
         return True
