@@ -634,11 +634,9 @@ class Reseau():
         
     def ipValide(ip: str) -> bool:
         try:
-            print("AAAAA  "+ip)
             ip_object = ipaddress.ip_address(ip) 
             octets = ip.strip().lower().split('.')
             if(int(octets[0])==127 or int(octets[0])==0):
-                #  or octets[0]>="224"                //54 plus grand que 224 ???? fait un mauvais masque + ip a cause du calcul 54>=224 qui renvoit true
                 return False
             return True
         except ValueError:
@@ -736,7 +734,14 @@ class Reseau():
     #     return "/"+str(total)
             
     def reseauValide(adrReseau: str) -> bool:
-        return True
+        try:
+            ip_object = ipaddress.ip_address(adrReseau) 
+            octets = adrReseau.strip().lower().split('.')
+            if(int(octets[0])==127 or int(octets[0])==0):
+                return False
+            return True
+        except ValueError:
+            return False
     
 
 class Connexion(Frame):
