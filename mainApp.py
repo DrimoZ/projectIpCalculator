@@ -814,18 +814,21 @@ class Connexion(CTkFrame):
 
         self.entrySignUpUser = CTkEntry(self.upFrame, width=200, placeholder_text="Identifiant")
         self.entrySignUpUser.place(y=120, x=SIGNUP_FRAME_CENTER + 100, anchor="center")
+        self.entrySignUpUser.bind("<Key>", self.checkSignUp)
 
         labSignUpPassword = CTkLabel(self.upFrame, text="Mot de passe")
         labSignUpPassword.place(y=170, x=SIGNUP_FRAME_CENTER - 100, anchor="center")
 
         self.entrySignUpPassword = CTkEntry(self.upFrame, width=200, show="*", placeholder_text="Mot de passe")
         self.entrySignUpPassword.place(y=170, x=SIGNUP_FRAME_CENTER + 100, anchor="center")
+        self.entrySignUpPassword.bind("<Key>", self.checkSignUp)
 
         labSignUpConfirm = CTkLabel(self.upFrame, text="Confirmer le mot de passe")
         labSignUpConfirm.place(y=220, x=SIGNUP_FRAME_CENTER - 100, anchor="center")
 
         self.entrySignUpConfirm = CTkEntry(self.upFrame, width=200, show="*", placeholder_text="Mot de passe")
         self.entrySignUpConfirm.place(y=220, x=SIGNUP_FRAME_CENTER + 100, anchor="center")
+        self.entrySignUpConfirm.bind("<Key>", self.checkSignUp)
 
         self.btnCheckSignUp = CTkButton(self.upFrame, text="Créer un nouveau compte", cursor="hand2", command= lambda: self.createAccount(), state=DISABLED)
         self.btnCheckSignUp.place(y=FRAME_SIZE_Y - 2*PAD_Y, x=SIGNUP_FRAME_CENTER, anchor="center")
