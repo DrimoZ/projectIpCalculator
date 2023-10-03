@@ -345,10 +345,13 @@ class Application2(Frame):
             self.attStr.set("Masque Réseau non-valide")
         elif (res.adrReseau == "0.0.0.0"):
             self.attStr.set("Adresse Réseau non-valide")
+        elif (res.adrReseau == "NON"):
+            self.rep.set("Pas dans le même réseau")
+            self.repFrame.place(x=330, y=150)
         else:
-            host = ipaddress.IPv4Address(res.ip)
             net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
-            self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{net.network_address:s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
+            # self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{net.network_address:s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
+            self.rep.set("L'adresse IP appartient bien au même réseau")
             self.repFrame.place(x=330, y=150)
         
     def verifCaracter(self, P):
@@ -608,9 +611,9 @@ class Reseau():
                 octets = ip.strip().lower().split('.')
             else:
                 octets = adrReseau.strip().lower().split('.')
-            if(octets[0]<"127"):
+            if(int(octets[0])<127):
                 self.masque="255.0.0.0"
-            elif(octets[0]<"192"):
+            elif(int(octets[0])<192):
                 self.masque="255.255.0.0"
             else:
                 self.masque="255.255.255.0"
@@ -619,20 +622,27 @@ class Reseau():
                 self.masque: str = "0.0.0.0"
 
         if (Reseau.reseauValide(adrReseau)):
-            self.adrReseau: str = adrReseau
+            
+            net = ipaddress.IPv4Network(self.ip + '/' + self.masque, False)
+
+# 
+            # 
+            # print("ip : "+self.ip+"\nMasque : "+self.masque+"\nAdresse : "+f'{net.network_address:s}')
+            if(adrReseau==f'{net.network_address:s}'):
+                self.adrReseau: str = adrReseau
+            else:
+                self.adrReseau:str = "NON"
         else:
             self.adrReseau: str = "0.0.0.0"
         
         self.adrBroadCast: str = "0.0.0.0"
         self.adrSR: str = "0.0.0.0"
-
-        # print(self.ip, self.masque, self.adrReseau, self.adrBroadCast, self.adrSR)
         
     def ipValide(ip: str) -> bool:
         try:
             ip_object = ipaddress.ip_address(ip) 
             octets = ip.strip().lower().split('.')
-            if(octets[0]=="127" or octets[0]=="0" or octets[0]>="224"):
+            if(int(octets[0])==127 or int(octets[0])==0):
                 return False
             return True
         except ValueError:
@@ -684,53 +694,60 @@ class Reseau():
         
         octetsIP = self.ip.strip().lower().split('.')
         octets = masque.strip().lower().split('.')
-        if(octetsIP[0]<"127"):
-            if(octets[0]=="255"):
+        if(int(octetsIP[0])<127):
+            if(int(octets[0])==255):
                 self.masque: str = masque
             else:
                 return False
-        elif(octetsIP[0]<"192"):
-            if(octets[1]=="255"):
+        elif(int(octetsIP[0])<192):
+            if(int(octets[1])==255):
                 self.masque: str = masque
             else:
                 return False
             
         else:
-            if(octets[2]=="255"):
+            if(int(octets[2])==255):
                 self.masque: str = masque
             else:
                 return False
                    
         return True
 
-    def convertMasque(masque: str) -> str:
-        octets = masque.strip().lower().split('.')
-        total=0
-        for o in octets:
-            if o == 255:
-                total+=8
-            elif o == 0:
-                pass
-            else:
-                match o:
-                    case 128:
-                        total+=1
-                    case 192:
-                        total+=2
-                    case 224:
-                        total+=3
-                    case 240:
-                        total+=4
-                    case 248:
-                        total+=5
-                    case 252:
-                        total+=6
-                    case 254:
-                        total+=7
-        return "/"+str(total)
+    # def convertMasque(masque: str) -> str:
+    #     octets = masque.strip().lower().split('.')
+    #     total=0
+    #     for o in octets:
+    #         if o == 255:
+    #             total+=8
+    #         elif o == 0:
+    #             pass
+    #         else:
+    #             match o:
+    #                 case 128:
+    #                     total+=1
+    #                 case 192:
+    #                     total+=2
+    #                 case 224:
+    #                     total+=3
+    #                 case 240:
+    #                     total+=4
+    #                 case 248:
+    #                     total+=5
+    #                 case 252:
+    #                     total+=6
+    #                 case 254:
+    #                     total+=7
+    #     return "/"+str(total)
             
     def reseauValide(adrReseau: str) -> bool:
-        return True
+        try:
+            ip_object = ipaddress.ip_address(adrReseau) 
+            octets = adrReseau.strip().lower().split('.')
+            if(int(octets[0])==127 or int(octets[0])==0):
+                return False
+            return True
+        except ValueError:
+            return False
     
 
 class Connexion(Frame):
