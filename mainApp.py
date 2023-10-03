@@ -1,5 +1,6 @@
 from tkinter import ttk
 from tkinter import *
+from customtkinter import *
 
 import ipaddress
 import webbrowser
@@ -10,10 +11,27 @@ from PIL import ImageTk, Image
 
 ### GROUPE 5 
 
+set_appearance_mode("dark") 
+set_default_color_theme("green")
+
 PAD_X = 30
 PAD_Y = 30
+
 SIZE_X = 1000
 SIZE_Y = 560
+
+CENTER_WINDOW = SIZE_X / 2
+FRAME_SIZE_X = SIZE_X - 2 * PAD_X
+CONNECTION_FRAME_SIZE_X = (SIZE_X - 3 * PAD_X) / 5 * 2
+SIGNUP_FRAME_SIZE_X = CONNECTION_FRAME_SIZE_X * 1.5
+FRAME_SIZE_Y = SIZE_Y - 5 * PAD_Y
+
+TITLE_PLACEMENT_Y = PAD_Y
+
+CONNECTION_FRAME_CENTER = CONNECTION_FRAME_SIZE_X / 2
+SIGNUP_FRAME_CENTER = SIGNUP_FRAME_SIZE_X / 2
+
+FRAME_Y_ORIGIN = 90
 
 isConnected = False
 
@@ -48,7 +66,7 @@ class MainApplication(Tk):
         self.resizable(False, False)
          
         # creating a container
-        container = Frame(self, cursor="tcross") 
+        container = CTkFrame(self, cursor="tcross") 
         container.pack(anchor=CENTER, fill = "both", expand = True)
   
         container.grid_rowconfigure(0, weight = 1)
@@ -90,7 +108,7 @@ class MainApplication(Tk):
         
   
 # Page d'acceuil
-class HomePage(Frame):
+class HomePage(CTkFrame):
     """
     - Les IP et masques invalides seront automatiquement refusés par le 
     système
@@ -104,7 +122,7 @@ class HomePage(Frame):
     bonus
     """
     def __init__(self, parent, controller):
-        Frame.__init__(self, parent)
+        CTkFrame.__init__(self, parent)
 
         label = Label(self, text ="Application en Python pour le cours de Reseau/IP - 2023/2024", font = 'Times 19', borderwidth=1, relief="solid")
         label.grid(row = 0, column = 0,  columnspan = 3, padx = 10, pady = 10)
@@ -117,7 +135,7 @@ class HomePage(Frame):
 
         for i in range(0, len(list)):
             self.grid_columnconfigure(i, weight=1)
-            frame = Frame(self, highlightbackground="red", highlightthickness=1)
+            frame = CTkFrame(self)
 
             # Convert the image data into a PIL Image
             current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -150,7 +168,7 @@ class HomePage(Frame):
             appButton.grid(row = 2, column = 0, padx = 10, pady = 10)
             frame.grid(row = 1, column = i, padx = 10, pady = 10)
   
-class Application1(Frame):
+class Application1(CTkFrame):
     """
     En classfull uniquement, sur base d’une adresse IP et d’un masque, le 
     programme doit fournir l’adresse de réseau et l’adresse de broadcast du 
@@ -158,12 +176,11 @@ class Application1(Frame):
     déterminer l’adresse de SR
     """
     def __init__(self, parent, controller):
-        Frame.__init__(self, parent)
+        CTkFrame.__init__(self, parent)
 
         # Frame - Données d'entrée
-        self.infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        self.infoFrame = CTkFrame(master=self, width=270, height=170)
         self.infoFrame.grid_propagate(0)
-        self.infoFrame.config(width=270, height=170)
 
         # Labels
         labIp = Label(self.infoFrame, text="Adresse Ip * : ", width=15)
@@ -194,7 +211,7 @@ class Application1(Frame):
 
 
         #Frame de Titre
-        titleFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=90)
+        titleFrame = CTkFrame(master=self, width=SIZE_X-360, height=90)
         titleFrame.grid_propagate(0)
         titleFrame.place(x=330, y=30)
 
@@ -205,7 +222,7 @@ class Application1(Frame):
         lblExo.place(x=10, y=40)
 
         #Frame - Reponses
-        self.repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
+        self.repFrame = CTkFrame(master=self, width=SIZE_X-360, height=300)
         self.repFrame.grid_propagate(0)
 
         self.rep = StringVar()
@@ -254,21 +271,18 @@ class Application1(Frame):
         
 
 
-
-
-class Application2(Frame):
+class Application2(CTkFrame):
     """
     Sur base d’une adresse IP et de son masque et d’une adresse de réseau, le 
     programme doit déterminer si l’IP appartient au réseau ou pas. CLASSFULL
     """
 
     def __init__(self, parent, controller):
-        Frame.__init__(self, parent)
+        CTkFrame.__init__(self, parent)
 
         # Frame - Données d'entrée
-        self.infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        self.infoFrame = CTkFrame(master=self, width=270, height=210)
         self.infoFrame.grid_propagate(0)
-        self.infoFrame.config(width=270, height=210)
 
         # Labels - Données d'entrée
         labIp = Label(self.infoFrame, text="Adresse IP * : ", width=15).grid(row = 1, column = 0, padx = 10, pady = 10)
@@ -300,7 +314,7 @@ class Application2(Frame):
 
 
         # Frame - Titre
-        titleFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=90)
+        titleFrame = CTkFrame(self, width=SIZE_X-360, height=90)
         titleFrame.grid_propagate(0)
         titleFrame.place(x=330, y=30)
 
@@ -312,7 +326,7 @@ class Application2(Frame):
 
 
         # Frame - Réponses
-        self.repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
+        self.repFrame = CTkFrame(master=self, width=SIZE_X-360, height=300)
         self.repFrame.grid_propagate(0)
 
         # Labels - Titre
@@ -369,7 +383,7 @@ class Application2(Frame):
         self.repFrame.place_forget()
 
 
-class Application3(Frame):
+class Application3(CTkFrame):
     """
     Sur base de la description d’un réseau (nombre de SR, nombre d’hôtes 
     dans chacun d’entre eux, IP et masque de départ), le programme doit 
@@ -389,12 +403,11 @@ class Application3(Frame):
     cette découpe
     """
     def __init__(self, parent, controller):
-        Frame.__init__(self, parent)
+        CTkFrame.__init__(self, parent)
 
         # Frame - Données d'entrée
-        self.infoFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        self.infoFrame = CTkFrame(self,width=270, height=250)
         self.infoFrame.grid_propagate(0)
-        self.infoFrame.config(width=270, height=250)
 
         # Labels - Données d'entrée
         labReseau = Label(self.infoFrame, text="Adresse Réseau * : ", width=15).grid(row = 1, column = 0, padx = 10, pady = 10)
@@ -430,7 +443,7 @@ class Application3(Frame):
         self.infoFrame.place(x=30, y=30)
 
         # Frame - Titre
-        titleFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=90)
+        titleFrame = CTkFrame(self, width=SIZE_X-360, height=90)
         titleFrame.grid_propagate(0)
         titleFrame.place(x=330, y=30)
 
@@ -442,7 +455,7 @@ class Application3(Frame):
 
 
         # Frame - Réponses
-        self.repFrame = Frame(self, highlightbackground="black", highlightthickness=1, width=SIZE_X-360, height=300)
+        self.repFrame = CTkFrame(self,width=SIZE_X-360, height=300)
         self.repFrame.grid_propagate(0)
 
         # Labels - Titre
@@ -517,7 +530,7 @@ class Application3(Frame):
                     print(f"Sous-réseau {i+1} : {sub.network_address}/{subnet_mask_length}")
 
             #define a frame that will contian the table and scrollbar
-            self.tableFrame = Frame(self, width=600, height=150)
+            self.tableFrame = CTkFrame(self, width=600, height=150)
             self.tableFrame.grid_propagate(0)
 
             #define the table with tkinter
@@ -606,11 +619,7 @@ class Reseau():
             self.ip: str = "0.0.0.0"
 
         if(masque==""):
-            octets = 0
-            if(ip != "0.0.0.0"):
-                octets = ip.strip().lower().split('.')
-            else:
-                octets = adrReseau.strip().lower().split('.')
+            octets = ip.strip().lower().split('.')
             if(int(octets[0])<127):
                 self.masque="255.0.0.0"
             elif(int(octets[0])<192):
@@ -625,8 +634,6 @@ class Reseau():
             
             net = ipaddress.IPv4Network(self.ip + '/' + self.masque, False)
 
-# 
-            # 
             # print("ip : "+self.ip+"\nMasque : "+self.masque+"\nAdresse : "+f'{net.network_address:s}')
             if(adrReseau==f'{net.network_address:s}'):
                 self.adrReseau: str = adrReseau
@@ -748,87 +755,120 @@ class Reseau():
             return True
         except ValueError:
             return False
-    
 
-class Connexion(Frame):
+class Connexion(CTkFrame):
+    # Init de la Frame
     def __init__(self, parent, controller):
-        Frame.__init__(self, parent)
+        CTkFrame.__init__(self, parent)
+        
+        #Titre du Programme
+        CTkLabel(self, text="Réseau - Ip : Vérificateur d'Ip", font=CTkFont("Times", 29, "bold", underline=True)).place(y=TITLE_PLACEMENT_Y, x=CENTER_WINDOW, anchor="center")
 
-        # Frame - Connexion
-        self.inFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+
+        #Declaraction des Frames
+        self.inFrame = CTkFrame(master=self, width=CONNECTION_FRAME_SIZE_X, height=FRAME_SIZE_Y, corner_radius=25)
         self.inFrame.grid_propagate(0)
-        self.inFrame.config(width=270, height=253)
-
-        # Labels - Connexion
-        labnomC = Label(self.inFrame, text="Connexion", font = 'Times 14 underline' ).grid(row = 0, column = 0, columnspan=2, padx = 10, pady = 10)
-
-        labIdC = Label(self.inFrame, text="Identifiant * : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
-        labPassC = Label(self.inFrame, text="Mot de passe * : ", width=15).grid(row = 3, column = 0, padx = 10, pady = 10)
-
-        # Entries - Connexion
-        self.textIdC = Entry(self.inFrame, width=20)
-        self.textIdC.grid(row = 2, column = 1, pady = 10)
-        self.textPassC = Entry(self.inFrame, width=20, show="*")
-        self.textPassC.grid(row = 3, column = 1, pady = 10)
-
-        # Errors - Connexion
-        self.attStrC = StringVar()
-        self.attStrC.set("")
-        lblVerifC = Label(self.inFrame, textvariable=self.attStrC, justify="center", fg="red")
-        lblVerifC.grid(row = 4, column = 0, columnspan=2, padx = 10, pady = 10)
-
-        # Buttons - Connexion
-        btnCheckC = Button(self.inFrame, text="Se Connecter", cursor="hand2")
-        btnCheckC.config(command= lambda: self.connect())
-        btnCheckC.grid(row = 5, column = 0, columnspan=2, padx = 10, pady = 10)
-
-        self.inFrame.place(x=30, y=30)
-
-        # Frame - Sign Up
-        self.upFrame = Frame(self, highlightbackground="black", highlightthickness=1)
+        self.upFrame = CTkFrame(master=self, width=SIGNUP_FRAME_SIZE_X, height=FRAME_SIZE_Y, corner_radius=25)
         self.upFrame.grid_propagate(0)
-        self.upFrame.config(width=270, height=253)
 
-        # Labels - Sign Up
-        labPassU = Label(self.upFrame, text="Creation de compte", font = 'Times 14 underline' ).grid(row = 0, column = 0, columnspan=2, padx = 10, pady = 10)
 
-        labIdU = Label(self.upFrame, text="Identifiant * : ", width=15).grid(row = 2, column = 0, padx = 10, pady = 10)
-        labPassU = Label(self.upFrame, text="Mot de passe * : ", width=15).grid(row = 3, column = 0, padx = 10, pady = 10)
-        labPassU = Label(self.upFrame, text="Réécrire le MDP * : ", width=15).grid(row = 4, column = 0, padx = 10, pady = 10)
+        #Label - Sous-Titre
+        CTkLabel(self.inFrame, text="Connexion", font=CTkFont("Times", 26, underline=True)).place(y=30, x=CONNECTION_FRAME_CENTER, anchor="center")
+        CTkLabel(self.upFrame, text="Créer un compte", font=CTkFont("Times", 26, underline=True)).place(y=30, x=SIGNUP_FRAME_CENTER, anchor="center")
 
-        # Entries - Sign Up
-        self.textIdU = Entry(self.upFrame, width=20)
-        self.textIdU.grid(row = 2, column = 1, pady = 10)
-        self.textPassU = Entry(self.upFrame, width=20, show="*")
-        self.textPassU.grid(row = 3, column = 1, pady = 10)
-        self.textVerifU = Entry(self.upFrame, width=20, show="*")
-        self.textVerifU.grid(row = 4, column = 1, pady = 10)
 
-        # Errors - Sign Up
-        self.attStrU = StringVar()
-        self.attStrU.set("")
-        lblVerifU = Label(self.upFrame, textvariable=self.attStrU, justify="center", fg="red")
-        lblVerifU.grid(row = 5, column = 0, columnspan=2, padx = 10, pady = 10)
+        #Menu de Connexion
+        labConnInfo = CTkLabel(self.inFrame, text="Connectez-vous pour accéder à l'application\net profiter de ses services.", text_color="gray")
+        labConnInfo.place(y=70, x=CONNECTION_FRAME_CENTER, anchor="center")
 
-        # Buttons - Sign Up
-        btnCheck = Button(self.upFrame, text="Créer un compte", cursor="hand2")
-        btnCheck.config(command= lambda: self.createAccount())
-        btnCheck.grid(row = 6, column = 0, columnspan=2, padx = 10, pady = 10)
+        labConnUser = CTkLabel(self.inFrame, text="Nom d'utilisateur")
+        labConnUser.place(y=120, x=CONNECTION_FRAME_CENTER, anchor="center")
 
-        self.upFrame.place(x=330, y=30)
+        self.entryConnUser = CTkEntry(self.inFrame, width=200, placeholder_text="Identifiant")
+        self.entryConnUser.place(y=150, x=CONNECTION_FRAME_CENTER, anchor="center")
+        self.entryConnUser.bind("<Key>", self.checkConnection)
+
+        labConnPassword = CTkLabel(self.inFrame, text="Mot de Passe")
+        labConnPassword.place(y=200, x=CONNECTION_FRAME_CENTER, anchor="center")
+
+        self.entryConnPassword = CTkEntry(self.inFrame, width=200, show="*", placeholder_text="Mot de passe")
+        self.entryConnPassword.place(y=230, x=CONNECTION_FRAME_CENTER, anchor="center")
+        self.entryConnPassword.bind("<Key>", self.checkConnection)
+
+        self.btnCheckConn = CTkButton(self.inFrame, text="Se Connecter", cursor="hand2",command= lambda: self.connect(), state=DISABLED)
+        self.btnCheckConn.place(y=FRAME_SIZE_Y - 2*PAD_Y, x=CONNECTION_FRAME_CENTER, anchor="center")
+
+        self.strConnErr = StringVar()
+        self.strConnErr.set("")
+
+        lblVerifC = CTkLabel(self.inFrame, textvariable=self.strConnErr, text_color="red")
+        lblVerifC.place(y=FRAME_SIZE_Y - 3*PAD_Y, x=CONNECTION_FRAME_CENTER, anchor="center")
+
+
+        #Menu de Sign Up
+        labSignUpInfo = CTkLabel(self.upFrame, text="Créer un compte et profiter directement des services de l'application.", text_color="gray")
+        labSignUpInfo.place(y=65, x=SIGNUP_FRAME_CENTER, anchor="center")
+
+        labSignUpUser = CTkLabel(self.upFrame, text="Nom d'utilisateur")
+        labSignUpUser.place(y=120, x=SIGNUP_FRAME_CENTER - 100, anchor="center")
+
+        self.entrySignUpUser = CTkEntry(self.upFrame, width=200, placeholder_text="Identifiant")
+        self.entrySignUpUser.place(y=120, x=SIGNUP_FRAME_CENTER + 100, anchor="center")
+
+        labSignUpPassword = CTkLabel(self.upFrame, text="Mot de passe")
+        labSignUpPassword.place(y=170, x=SIGNUP_FRAME_CENTER - 100, anchor="center")
+
+        self.entrySignUpPassword = CTkEntry(self.upFrame, width=200, show="*", placeholder_text="Mot de passe")
+        self.entrySignUpPassword.place(y=170, x=SIGNUP_FRAME_CENTER + 100, anchor="center")
+
+        labSignUpConfirm = CTkLabel(self.upFrame, text="Confirmer le mot de passe")
+        labSignUpConfirm.place(y=220, x=SIGNUP_FRAME_CENTER - 100, anchor="center")
+
+        self.entrySignUpConfirm = CTkEntry(self.upFrame, width=200, show="*", placeholder_text="Mot de passe")
+        self.entrySignUpConfirm.place(y=220, x=SIGNUP_FRAME_CENTER + 100, anchor="center")
+
+        self.btnCheckSignUp = CTkButton(self.upFrame, text="Créer un nouveau compte", cursor="hand2", command= lambda: self.createAccount(), state=DISABLED)
+        self.btnCheckSignUp.place(y=FRAME_SIZE_Y - 2*PAD_Y, x=SIGNUP_FRAME_CENTER, anchor="center")
+
+        self.strSignUpErr = StringVar()
+        self.strSignUpErr.set("")
+        
+        lblVerifU = CTkLabel(self.upFrame, textvariable=self.strSignUpErr, text_color="red")
+        lblVerifU.place(y=FRAME_SIZE_Y - 3*PAD_Y, x=SIGNUP_FRAME_CENTER, anchor="center")
+
+
+        #Placement des frames
+        self.inFrame.place(x = PAD_X, y = FRAME_Y_ORIGIN)
+        self.upFrame.place(x=2 * PAD_X + CONNECTION_FRAME_SIZE_X, y = FRAME_Y_ORIGIN)
+
+    def checkConnection(self, event):
+        if (self.entryConnUser.get() == "" or self.entryConnPassword.get() == ""):
+            self.btnCheckConn.configure(state=DISABLED)
+            self.strConnErr.set("(*) Tous les champs sont requis")
+        else:
+            self.btnCheckConn.configure(state=NORMAL)
+            self.strConnErr.set("")
+    
+    def checkSignUp(self, event):
+        if (self.entrySignUpUser.get() == "" or self.entrySignUpPassword.get() == "" or self.entrySignUpConfirm.get() == ""):
+            self.btnCheckSignUp.configure(state=DISABLED)
+            self.strSignUpErr.set("(*) Tous les champs sont requis")
+        else:
+            self.btnCheckSignUp.configure(state=NORMAL)
+            self.strSignUpErr.set("")
 
     def createAccount(self) :
-        userId = self.textIdU.get()
-        userPassword = self.textPassU.get()
-        passwordConfirmation = self.textVerifU.get()
+        userId = self.entrySignUpUser.get()
+        userPassword = self.entrySignUpPassword.get()
+        passwordConfirmation = self.entrySignUpConfirm.get()
         
 
         if (userId == "" or userPassword == "" or passwordConfirmation == ""):
-            self.attStrU.set("(*) Tous les champs sont requis")
+            self.strSignUpErr.set("(*) Tous les champs sont requis")
             return
         
         if (userPassword != passwordConfirmation):
-            self.attStrU.set("Les mots de passe ne correspondent pas")
+            self.strSignUpErr.set("Les mots de passe ne correspondent pas")
             return
 
         conn = sqlite3.connect('database.db')
@@ -836,7 +876,7 @@ class Connexion(Frame):
         find_user = ('SELECT * FROM user WHERE username = ?')
         c.execute(find_user, [(userId)])
         if c.fetchall():
-            self.attStrU.set("Ce nom d'utilisateur existe déjà")
+            self.strSignUpErr.set("Ce nom d'utilisateur existe déjà")
         else:
             hashed_password = bcrypt.hashpw(userPassword.encode('utf8'), bcrypt.gensalt())
 
@@ -849,10 +889,10 @@ class Connexion(Frame):
         return
         
     def connect(self):
-        userId = self.textIdC.get()
-        userPassword = self.textPassC.get()
+        userId = self.entryConnUser.get()
+        userPassword = self.entryConnPassword.get()
         if (userId == "" or userPassword == ""):
-            self.attStrC.set("(*) Tous les champs sont requis")
+            self.strConnErr.set("(*) Tous les champs sont requis")
             return
 
         conn = sqlite3.connect('database.db')
@@ -864,29 +904,30 @@ class Connexion(Frame):
         result = c.fetchall()
         if result:
             if bcrypt.checkpw(userPassword.encode('utf8'), result[0][2]):
-                self.attStrC.set("Connexion réussie")
+                self.strConnErr.set("Connexion réussie")
                 setConnected()
 
             else:
-                self.attStrC.set("Mot de passe incorrect")
+                self.strConnErr.set("Mot de passe incorrect")
 
         else:
-            self.attStrC.set("Nom d'utilisateur incorrect")
+            self.strConnErr.set("Nom d'utilisateur incorrect")
 
         c.close()
         conn.close()
         return
 
     def reset(self):
-        self.textIdC.delete(0, END)
-        self.textPassC.delete(0, END)
-        self.textIdU.delete(0, END)
-        self.textPassU.delete(0, END)
-        self.textVerifU.delete(0, END)
-        self.attStrC.set("")
-        self.attStrU.set("")
+        self.btnCheckConn.configure(state=DISABLED)
+        self.btnCheckSignUp.configure(state=DISABLED)
+        self.entryConnUser.delete(0, END)
+        self.entryConnPassword.delete(0, END)
+        self.entrySignUpUser.delete(0, END)
+        self.entrySignUpPassword.delete(0, END)
+        self.entrySignUpConfirm.delete(0, END)
+        self.strConnErr.set("")
+        self.strSignUpErr.set("")
 
 # Start
 app = MainApplication()
 app.mainloop()
-
