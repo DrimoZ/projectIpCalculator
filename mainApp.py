@@ -8,8 +8,11 @@ import sqlite3
 import bcrypt
 import os
 from PIL import ImageTk, Image
+import customtkinter as ctk
 
 ### GROUPE 5 
+ctk.set_appearance_mode("System")  
+ctk.set_default_color_theme("green")  
 
 set_appearance_mode("dark") 
 set_default_color_theme("green")
@@ -129,8 +132,8 @@ class HomePage(CTkFrame):
 
         list = [
             ["Application 1", "IPFinder.png"],
-            ["Application 2", "IPFinder.png"],
-            ["Application 3", "IPFinder.png"],
+            ["Application 2", "computer-network.png"],
+            ["Application 3", "decoupe.png"],
         ]
 
         for i in range(0, len(list)):
@@ -141,12 +144,11 @@ class HomePage(CTkFrame):
             current_dir = os.path.dirname(os.path.abspath(__file__))
             img = Image.open(os.path.join(current_dir, "Image", list[i][1]))
 
+            # Resize the image to your desired dimensions (e.g., 300x300 pixels)
+            img = img.resize((250, 250), Image.Resampling.LANCZOS)
+
             # Create a Tkinter PhotoImage object from the PIL Image
             img_tk = ImageTk.PhotoImage(img)
-
-            # Resize the image to your desired dimensions (e.g., 300x300 pixels)
-            img = img.resize((700, 700), Image.Resampling.LANCZOS)
-
 
             # , borderwidth=1, relief="solid", justify="center", width=200,height=200
             label = Label(frame,image=img_tk,width=300,height=300)
@@ -269,7 +271,6 @@ class Application1(CTkFrame):
         self.textMasque.delete(0, END)
         self.repFrame.place_forget()
         
-
 
 class Application2(CTkFrame):
     """
@@ -601,7 +602,6 @@ class Application3(CTkFrame):
             self.tableFrame.place_forget()
 
 
-
 class Reseau():
     """
     Reprend toutes les informations et méthodes de verification/recherche/etc de réseau ou ip. 
@@ -633,8 +633,8 @@ class Reseau():
         if (Reseau.reseauValide(adrReseau)):
             
             net = ipaddress.IPv4Network(self.ip + '/' + self.masque, False)
-
             # print("ip : "+self.ip+"\nMasque : "+self.masque+"\nAdresse : "+f'{net.network_address:s}')
+
             if(adrReseau==f'{net.network_address:s}'):
                 self.adrReseau: str = adrReseau
             else:
