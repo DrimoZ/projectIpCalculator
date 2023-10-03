@@ -235,7 +235,7 @@ class Application1(Frame):
             self.attStr.set("Masque Réseau non-valide")
         else:
             host = ipaddress.IPv4Address(res.ip)
-            # net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
+            net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
             self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{net.network_address:s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
             self.repFrame.place(x=330, y=150)
 
@@ -487,6 +487,7 @@ class Application3(Frame):
         elif (res.adrReseau == "0.0.0.0"):
             self.attStr.set("Adresse Réseau non-valide")
         else:
+            print(res.adrReseau + " - "  + res.masque)
             # find the number of hosts possible with the given network and mask
             net = ipaddress.IPv4Network(res.adrReseau + '/' + res.masque, False)
             nbHotes = net.num_addresses - 2
@@ -602,7 +603,11 @@ class Reseau():
             self.ip: str = "0.0.0.0"
 
         if(masque==""):
-            octets = ip.strip().lower().split('.')
+            octets = 0
+            if(ip != "0.0.0.0"):
+                octets = ip.strip().lower().split('.')
+            else:
+                octets = adrReseau.strip().lower().split('.')
             if(octets[0]<"127"):
                 self.masque="255.0.0.0"
             elif(octets[0]<"192"):
