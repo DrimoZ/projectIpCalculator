@@ -1,53 +1,27 @@
-import tkinter as tk
-from PIL import Image, ImageTk
-import requests
-from io import BytesIO
+from tkinter import *
 
-# Create a Tkinter window
-root = tk.Tk()
-root.title("Image from URL")
+var = Tk()
 
-# Function to display an image from a URL
-def display_image():
-    # Get the URL from the Entry widget
-    url = url_entry.get()
+def leftclick(event):
 
-    try:
-        # Fetch the image from the URL
-        response = requests.get(url)
-        img_data = response.content
+    print("left")
 
-        # Convert the image data into a PIL Image
-        img = Image.open(BytesIO(img_data))
+def middleclick(event):
 
-        # Create a Tkinter PhotoImage object from the PIL Image
-        img_tk = ImageTk.PhotoImage(img)
+    print("middle")
 
-        # Display the image in a Label widget
-        image_label.config(image=img_tk)
-        image_label.image = img_tk
+def rightclick(event):
 
-    except Exception as e:
-        result_label.config(text=f"Error: {str(e)}")
+    print("right")
 
-# Create an Entry widget for entering the image URL
-url_label = tk.Label(root, text="Enter Image URL:")
-url_label.pack()
+frame = Frame(var, width=300, height=250)
 
-url_entry = tk.Entry(root)
-url_entry.pack()
+frame.bind("<Button-1>", leftclick)
 
-# Create a Button to fetch and display the image
-fetch_button = tk.Button(root, text="Fetch Image", command=display_image)
-fetch_button.pack()
+frame.bind("<Button-2>", middleclick)
 
-# Create a Label to display the image
-image_label = tk.Label(root)
-image_label.pack()
+frame.bind("<Button-3>", rightclick)
 
-# Create a Label to display error messages, if any
-result_label = tk.Label(root, fg="red")
-result_label.pack()
+frame.pack()
 
-# Start the Tkinter main loop
-root.mainloop()
+var.mainloop()

@@ -113,9 +113,9 @@ class HomePage(Frame):
         label.grid(row = 0, column = 0,  columnspan = 3, padx = 10, pady = 10)
 
         list = [
-            ["Application 1", "IPFinder.png"],
-            ["Application 2", "computer-network.png"],
-            ["Application 3", "decoupe.png"],
+            ["Trouve les informations nécessaire par rapport à une ip \net un masque donnée", "IPFinder.png"],
+            ["Vérifie si une ip est dans un réseau \n(ou sous-réseau si découpe)", "computer-network.png"],
+            ["Création d'une découpe de sous-réseau", "decoupe.png"],
         ]
 
         for i in range(0, len(list)):
@@ -139,9 +139,9 @@ class HomePage(Frame):
             label.config(image=img_tk)
             label.image = img_tk
                 
-            label.grid(row = 1, column = 0)
+            # label.grid(row = 1, column = 0)
 
-            appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid", cursor="hand2")
+            appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid", cursor="hand2",image=img_tk)
             if (i == 0):
                 appButton.config(command = lambda : controller.show_frame(Application1))
             elif (i == 1):
