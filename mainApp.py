@@ -127,7 +127,7 @@ class HomePage(CTkFrame):
     def __init__(self, parent, controller):
         CTkFrame.__init__(self, parent)
 
-        label = Label(self, text ="Application en Python pour le cours de Reseau/IP - 2023/2024", font = 'Times 19', borderwidth=1, relief="solid")
+        label = CTkLabel(self, text ="Application en Python pour le cours de Reseau/IP - 2023/2024", font = ("Times",29,'bold'))
         label.grid(row = 0, column = 0,  columnspan = 3, padx = 10, pady = 10)
 
         list = [
@@ -144,31 +144,23 @@ class HomePage(CTkFrame):
             current_dir = os.path.dirname(os.path.abspath(__file__))
             img = Image.open(os.path.join(current_dir, "Image", list[i][1]))
 
-            # Resize the image to your desired dimensions (e.g., 300x300 pixels)
-            img = img.resize((250, 250), Image.Resampling.LANCZOS)
-
             # Create a Tkinter PhotoImage object from the PIL Image
-            img_tk = ImageTk.PhotoImage(img)
+            img_tk = CTkImage(img,size=(300, 300))
 
             # , borderwidth=1, relief="solid", justify="center", width=200,height=200
-            label = Label(frame,image=img_tk,width=300,height=300)
-            
-            # Display the image in a Label widget
-            label.config(image=img_tk)
-            label.image = img_tk
-                
-            # label.grid(row = 1, column = 0)
+            label = CTkLabel(frame,image=img_tk,width=300,height=300,text="")
 
-            appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid", cursor="hand2",image=img_tk)
+            appButton = CTkButton(frame, text=list[i][0],fg_color=("Black"))
             if (i == 0):
-                appButton.config(command = lambda : controller.show_frame(Application1))
+                appButton.configure(command = lambda : controller.show_frame(Application1))
             elif (i == 1):
-                appButton.config(command = lambda : controller.show_frame(Application2))
+                appButton.configure(command = lambda : controller.show_frame(Application2))
             elif (i == 2):
-                appButton.config(command = lambda : controller.show_frame(Application3))
+                appButton.configure(command = lambda : controller.show_frame(Application3))
 
-            appButton.grid(row = 2, column = 0, padx = 10, pady = 10)
-            frame.grid(row = 1, column = i, padx = 10, pady = 10)
+            label.grid(row = 1, column = i,padx=10)
+            appButton.grid(row = 2, column = i,pady=30)
+            frame.grid(row = 1, column = i)
   
 class Application1(CTkFrame):
     """
