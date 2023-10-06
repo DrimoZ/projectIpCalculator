@@ -1,41 +1,17 @@
-from tkinter import *
+import tkinter as tk
 
-<<<<<<< HEAD
-var = Tk()
 
-def leftclick(event):
+def rand_func(eff=None, a=1, b=2, c=3):
+    print(a + b + c)
 
-    print("left")
+root = tk.Tk()
+root.bind("<Return>", lambda eff: rand_func(eff, a=10, b=20, c=30))
 
-def middleclick(event):
-
-    print("middle")
-
-def rightclick(event):
-
-    print("right")
-
-frame = Frame(var, width=300, height=250)
-
-frame.bind("<Button-1>", leftclick)
-
-frame.bind("<Button-2>", middleclick)
-
-frame.bind("<Button-3>", rightclick)
-
+frame = tk.Frame(root)
 frame.pack()
 
-var.mainloop()
-=======
-def motion(event):
-  print("Mouse position: (%s %s)" % (event.x, event.y))
-  return
+button = tk.Button(frame, text="click me",
+                   command=lambda: rand_func(None, 1, 2, 3))
+button.pack()
 
-master = Tk()
-whatever_you_do = "Whatever you do will be insignificant, but it is very important that you do it.\n(Mahatma Gandhi)"
-msg = Message(master, text = whatever_you_do)
-msg.config(bg='lightgreen', font=('times', 24, 'italic'))
-msg.bind('<Motion>',motion)
-msg.pack()
-mainloop()
->>>>>>> 451f9e73629306eaf0a6ecb243ee9b1f8a9edea6
+root.mainloop()
