@@ -159,7 +159,7 @@ class HomePage(CTkFrame):
                 appButton.configure(command = lambda : controller.show_frame(Application3))
 
             label.grid(row = 1, column = i,padx=10)
-            appButton.bind("<Button-3>", lambda eff: Palergun(label))
+            appButton.bind("<Double 3>", lambda eff: Palergun(label))
             appButton.grid(row = 2, column = i,pady=30)
             frame.grid(row = 1, column = i)
 
