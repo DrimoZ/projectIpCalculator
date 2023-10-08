@@ -368,7 +368,6 @@ class Application1(CTkFrame):
         
         # Instance de Reseau
         res = Reseau(self.app1EntryIp.get(), self.app1EntryMask.get())
-        print(res.ip, res.masque, res.adrReseau, res.adrSR)
 
         # Vérification des champs
         if (res.ip == "0.0.0.0"):
@@ -385,10 +384,7 @@ class Application1(CTkFrame):
             self.app1StrOutRes.set(f'{net.network_address:s}')
             self.app1StrOutBrd.set(f'{net.broadcast_address:s}')
 
-            if (self.hasCustomMask.get() == "on"):
-                self.app1StrOutSR.set(f'{net.supernet(new_prefix=int(res.masque.split(".")[3]) + 1).network_address:s}')
-            else:
-                self.app1StrOutSR.set("N/A")
+            
 
             self.app1OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
 
@@ -746,22 +742,10 @@ class Reseau():
     """
 
     def __init__(self, ip: str, masque: str, adrReseau: str = "0.0.0.0") -> None:
-        if (Reseau.isIpValide(ip)):
-            self.ip: str = ip
-        else:
-            self.ip: str = "0.0.0.0"
+        self.ip = Reseau.defineIp(self, ip)
+        self.masque = Reseau.defineMasque(self, masque)
 
-        if(masque==""):
-            octets = ip.strip().lower().split('.')
-            if(int(octets[0])<127):
-                self.masque="255.0.0.0"
-            elif(int(octets[0])<192):
-                self.masque="255.255.0.0"
-            else:
-                self.masque="255.255.255.0"
-        else:
-            if (not Reseau.masqueValide(self, masque)):
-                self.masque: str = "0.0.0.0"
+        
 
         if (Reseau.reseauValide(adrReseau)):
             net = ipaddress.IPv4Network(self.ip + '/' + self.masque, False)
@@ -773,10 +757,18 @@ class Reseau():
                 self.adrReseau:str = "NON"
         else:
             self.adrReseau: str = "0.0.0.0"
-        
+
         self.adrBroadCast: str = "0.0.0.0"
         self.adrSR: str = "0.0.0.0"
 
+
+
+    @staticmethod
+    def defineIp(self, ip: str) -> str:
+        if (Reseau.isIpValide(ip)):
+            return ip
+        else:
+            return"0.0.0.0"
 
     @staticmethod
     def isIpValide(ip: str) -> bool:
@@ -789,110 +781,78 @@ class Reseau():
         except ValueError:
             return False
 
-      
-    def ipValide(ip: str) -> bool:
-        try:
-            ip_object = ipaddress.ip_address(ip) 
-            octets = ip.strip().lower().split('.')
-            if(int(octets[0])==127 or int(octets[0])==0):
-                return False
-            return True
-        except ValueError:
-            return False
+    @staticmethod
+    def defineMasque(self, masque: str) -> str:
+        octetsIp = self.ip.strip().lower().split('.')
 
-    
-    def masqueValide(self, masque: str) -> bool:
+        # Si le masque n'est pas donné, on le défini en fonction de l'ip
+        if(masque==""):
+            if(int(octetsIp[0])<127):
+                return "255.0.0.0"
+            elif(int(octetsIp[0])<192):
+                return "255.255.0.0"
+            else:
+                return "255.255.255.0"
+        else:
+            # Si le masque est valide, on verifie qu'il est compatible avec l'ip
+            if (Reseau.isMasqueValide(self, masque)):
+                octetsMasque = masque.strip().lower().split('.')
+
+                if(int(octetsIp[0])<127 and int(octetsMasque[0])==255):
+                    return masque
+                elif(int(octetsIp[0])<192 and int(octetsMasque[1])==255):
+                    return masque
+                elif(int(octetsMasque[2])==255):
+                    return masque
+                else:
+                    return "0.0.0.0"
+            else:
+                return "0.0.0.0"
+
+    @staticmethod
+    def isMasqueValide(ip: str, masque: str) -> bool:
         octets = masque.strip().lower().split('.')
 
-        # Check if there are exactly 4 octets
+        # Vérification du nombre d'octets
         if len(octets) != 4:
             return False
         
-        # Initialize a flag to track contiguous 1s
-        contiguous_ones = True
+        # Initialisation d'un booleen pour verifier si on a des 1 contigus // Définition de l'octet précédent
+        est_contigu = True
 
         for octet in octets:
             try:
-                # Convert the octet to an integer
-                octet_value = int(octet)
+                val_octet = int(octet)
 
-                # Check if the octet is within the valid range [0, 255]
-                if octet_value < 0 or octet_value > 255:
+                # Si l'octet n'est pas compris entre 0 et 255, retourner False
+                if val_octet < 0 or val_octet > 255:
                     return False
-                
-                # Check if the octet is 255 (contiguous 1s)
-                if contiguous_ones:
-                    if octet_value != 255:
-                        i=1
-                        while(i!=512):
-                            if(256-i!=octet_value):
-                                i+=i
-                            else:
-                                break
-                        if(i==512):
-                            return False
-                        contiguous_ones = False
-                else:
-                    # Check if the octet is 0 (contiguous 0s)
-                    if octet_value != 0:
-                        return False
-                    
-            except ValueError:
-                # If an octet is not a valid integer, return False
-                return False
-            
-        # Check if there is at least one octet with contiguous 0s
-        if contiguous_ones:
-            return False
-        
-        octetsIP = self.ip.strip().lower().split('.')
-        octets = masque.strip().lower().split('.')
 
-        if(int(octetsIP[0])<127):
-            if(int(octets[0])==255):
-                self.masque: str = masque
-            else:
-                return False
-        elif(int(octetsIP[0])<192):
-            if(int(octets[1])==255):
-                self.masque: str = masque
-            else:
+                # vérifier que l'octet est contigu
+                if est_contigu:
+                    if val_octet != 255:
+                        # Si l'octet qui n'est pas a 255 n'est pas un des octets contigus, retourner False
+                        if not val_octet in [128, 192, 224, 240, 248, 252, 254, 255] :
+                            return False
+                        
+                        est_contigu = False
+                else:
+                    # Si n'est pas contigu et l'octet n'est pas 0, retourner False
+                    if val_octet != 0:
+                        return False
+            
+            # Si un octet n'est pas un entier, retourner False
+            except ValueError:
                 return False
             
-        else:
-            if(int(octets[2])==255):
-                self.masque: str = masque
-            else:
-                return False
+        # Si le masque fini par des 1, retourner False
+        if est_contigu:
+            return False
                    
         return True
 
-    # def convertMasque(masque: str) -> str:
-    #     octets = masque.strip().lower().split('.')
-    #     total=0
-    #     for o in octets:
-    #         if o == 255:
-    #             total+=8
-    #         elif o == 0:
-    #             pass
-    #         else:
-    #             match o:
-    #                 case 128:
-    #                     total+=1
-    #                 case 192:
-    #                     total+=2
-    #                 case 224:
-    #                     total+=3
-    #                 case 240:
-    #                     total+=4
-    #                 case 248:
-    #                     total+=5
-    #                 case 252:
-    #                     total+=6
-    #                 case 254:
-    #                     total+=7
-    #     return "/"+str(total)
-            
+    
+       
     def reseauValide(adrReseau: str) -> bool:
         try:
             ip_object = ipaddress.ip_address(adrReseau) 
