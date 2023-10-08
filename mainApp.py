@@ -304,7 +304,7 @@ class Application1(CTkFrame):
         labOutIp = CTkLabel(self.app1OutputFrame, text="Adresse IP : ")
         labOutIp.place(y=30, x=TITLE_OUTPUT_SIZE_X/2 - 120, anchor="w")
 
-        self.app1LblOutRes = CTkLabel(self.app1OutputFrame, textvariable=self.app1StrOutRes, text_color="green", justify="left")
+        self.app1LblOutRes = CTkLabel(self.app1OutputFrame, textvariable=self.app1StrOutIp, text_color="green", justify="left")
         self.app1LblOutRes.place(y=30, x=TITLE_OUTPUT_SIZE_X/2 + 50, anchor="w")
 
         labOutMask = CTkLabel(self.app1OutputFrame, text="Masque de réseau : ")
@@ -375,7 +375,7 @@ class Application1(CTkFrame):
         elif (res.masque == "0.0.0.0" and self.app1EntryMask.get() != ""):
             self.app1strErr.set("Masque Réseau non-valide")
         else:
-            print(res.ip, res.masque, res.adrReseau, res.adrBroadcast)
+            print(res.ip,"  aaaa   ", res.masque, res.adrReseau, res.adrBroadcast)
 
             self.app1StrOutIp.set(res.ip)
             self.app1StrOutMask.set(res.masque)
@@ -395,6 +395,7 @@ class Application1(CTkFrame):
         self.app1EntryMask.place_forget()
         self.app1OutputFrame.place_forget()
         self.app1strErr.set("")
+        
         
 
 class Application2(CTkFrame):
