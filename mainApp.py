@@ -249,85 +249,160 @@ class Application1(CTkFrame):
         # Inputs
         vcmd = (self.register(verifCaracter))
 
-        labIp = CTkLabel(self.app1InputFrame, text="Entrer les informations\nrequises pour l'application", text_color="gray")
-        labIp.place(y=30, x=INPUTFRAME_CENTER, anchor="center")
+        labIntro = CTkLabel(self.app1InputFrame, text="Entrer les informations\nrequises pour l'application", text_color="gray")
+        labIntro.place(y=30, x=INPUTFRAME_CENTER, anchor="center")
 
         labIp = CTkLabel(self.app1InputFrame, text="Adresse Ip")
         labIp.place(y=90, x=INPUTFRAME_CENTER, anchor="center")
 
         self.app1EntryIp = CTkEntry(self.app1InputFrame, width=200, validate="key", validatecommand=(vcmd, '%S'))
         self.app1EntryIp.place(y=120, x=INPUTFRAME_CENTER, anchor="center")
+        self.app1EntryIp.bind("<Key>", self.checkEntries)
 
-        # check = tk.Checkbutton(self, text="Découpe en sous-réseaux ?", variable=var, onvalue=1, offvalue=0, command=lambda: afficherMasque(var.get()))
+        self.labMask = CTkLabel(self.app1InputFrame, text="Masque de réseau")
 
-        check_var = StringVar()
-        checkbox = CTkCheckBox(self.app1InputFrame, text="CTkCheckBox", variable=check_var, onvalue="on", offvalue="off")
-        checkbox.place(y=170, x=INPUTFRAME_CENTER, anchor="center")
-        
+        self.app1EntryMask = CTkEntry(self.app1InputFrame, width=200, validate="key", validatecommand=(vcmd, '%S'))
+        self.app1EntryMask.bind("<Key>", self.checkEntries)
+
+        # Choix d'ajouter un masque ou non
+        self.hasCustomMask = StringVar()
+        self.hasCustomMask.set("off")
+
         def checkbox_event():
-            print("checkbox toggled, current value:", check_var.get())
+            if (self.hasCustomMask.get() == "on"):
+                self.labMask.place(y=200, x=INPUTFRAME_CENTER, anchor="center")
+                self.app1EntryMask.place(y=230, x=INPUTFRAME_CENTER, anchor="center")
+            else:
+                self.labMask.place_forget()
+                self.app1EntryMask.place_forget()
 
+        checkbox = CTkCheckBox(self.app1InputFrame, text="Découpe en sous-réseaux ?", command=checkbox_event, variable=self.hasCustomMask, onvalue="on", offvalue="off")
+        checkbox.place(y=160, x=INPUTFRAME_CENTER, anchor="center")
+        checkbox.bind("<Button-1>", self.checkEntries)
         
+        self.app1BtnCheck = CTkButton(self.app1InputFrame, text="Trouver le réseaux", cursor="hand2", command= lambda: self.trouverReseau(), state=DISABLED)
+        self.app1BtnCheck.place(y=FRAME_BUTTON_Y - PAD_Y, x=INPUTFRAME_CENTER, anchor="center")
 
-        # Entries
-        # self.textMasque = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
-        # self.textMasque.grid(row = 2, column = 1, pady = 10)
+        self.app1strErr = StringVar()
+        self.app1strErr.set("")
+        
+        labErr = CTkLabel(self.app1InputFrame, textvariable=self.app1strErr, text_color="red")
+        labErr.place(y=FRAME_SIZE_Y - 3*PAD_Y, x=INPUTFRAME_CENTER, anchor="center")
 
-        # Label d'erreur
-        # self.attStr = StringVar()
-        # self.attStr.set("")
-        # lblVerif = Label(self.infoFrame, textvariable=self.attStr, justify="center", fg="red")
-        # lblVerif.grid(row = 4, column = 0, columnspan=2, padx = 10, pady = 10)
+        # Frame d'output
+        self.app1StrOutIp = StringVar()
+        self.app1StrOutIp.set("")
+        self.app1StrOutMask = StringVar()
+        self.app1StrOutMask.set("")
+        self.app1StrOutRes = StringVar()
+        self.app1StrOutRes.set("")
+        self.app1StrOutBrd = StringVar()
+        self.app1StrOutBrd.set("")
+        self.app1StrOutSR = StringVar()
+        self.app1StrOutSR.set("")
 
-        # Bouton de vérification
-        # btnCheck = Button(self.infoFrame, text="Trouver le réseau", cursor="hand2") 
-        # btnCheck.config(command= lambda: self.trouverReseau())
-        # btnCheck.grid(row = 5, column = 0, columnspan=2, padx = 10, pady = 10)
+        labOutIp = CTkLabel(self.app1OutputFrame, text="Adresse IP : ")
+        labOutIp.place(y=30, x=TITLE_OUTPUT_SIZE_X/2 - 120, anchor="w")
 
-        # self.rep = StringVar()
-        # lblVerif = Label(self.repFrame, textvariable=self.rep, justify="center", fg="red")
-        # lblVerif.place(x=0, y=0)
+        self.app1LblOutRes = CTkLabel(self.app1OutputFrame, textvariable=self.app1StrOutRes, text_color="green", justify="left")
+        self.app1LblOutRes.place(y=30, x=TITLE_OUTPUT_SIZE_X/2 + 50, anchor="w")
+
+        labOutMask = CTkLabel(self.app1OutputFrame, text="Masque de réseau : ")
+        labOutMask.place(y=60, x=TITLE_OUTPUT_SIZE_X/2 - 120, anchor="w")
+
+        self.app1LblOutMask = CTkLabel(self.app1OutputFrame, textvariable=self.app1StrOutMask, text_color="green", justify="left")
+        self.app1LblOutMask.place(y=60, x=TITLE_OUTPUT_SIZE_X/2 + 50, anchor="w")
+
+        labOutRes = CTkLabel(self.app1OutputFrame, text="Adresse de réseau : ")
+        labOutRes.place(y=90, x=TITLE_OUTPUT_SIZE_X/2 - 120, anchor="w")
+
+        self.app1LblOutRes = CTkLabel(self.app1OutputFrame, textvariable=self.app1StrOutRes, text_color="green", justify="left")
+        self.app1LblOutRes.place(y=90, x=TITLE_OUTPUT_SIZE_X/2 + 50, anchor="w")
+
+        labOutBrd = CTkLabel(self.app1OutputFrame, text="Adresse de broadcast : ")
+        labOutBrd.place(y=120, x=TITLE_OUTPUT_SIZE_X/2 - 120, anchor="w")
+
+        self.app1LblOutBrd = CTkLabel(self.app1OutputFrame, textvariable=self.app1StrOutBrd, text_color="green", justify="left")
+        self.app1LblOutBrd.place(y=120, x=TITLE_OUTPUT_SIZE_X/2 + 50, anchor="w")
+
+        labOutSr = CTkLabel(self.app1OutputFrame, text="Adresse de sous-réseau : ")
+        labOutSr.place(y=150, x=TITLE_OUTPUT_SIZE_X/2 - 120, anchor="w")
+
+        self.app1LblOutSr = CTkLabel(self.app1OutputFrame, textvariable=self.app1StrOutSR, text_color="green", justify="left")
+        self.app1LblOutSr.place(y=150, x=TITLE_OUTPUT_SIZE_X/2 + 50, anchor="w")
+
 
         #Placement des frames
         self.app1InputFrame.place(x = PAD_X, y = PAD_Y)
-        self.app1OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
         app1TitleFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = PAD_Y)
 
+    def checkEntries(self, event):
+        if (self.hasCustomMask.get() == "off"):
+            self.app1EntryMask.delete(0, END)
+        if (self.app1EntryIp.get() == ""):
+            self.app1BtnCheck.configure(state=DISABLED, cursor="tcross")
+            self.app1strErr.set("(*) Champ requis : IP")
+        elif (self.hasCustomMask.get() == "on" and self.app1EntryMask.get() == ""):
+            self.app1BtnCheck.configure(state=DISABLED, cursor="tcross")
+            self.app1strErr.set("(*) Champ requis : Masque de réseau")
+        else:
+            self.app1BtnCheck.configure(state=NORMAL, cursor="hand2")
+            self.app1strErr.set("")
 
     def trouverReseau(self) -> None :
         """
         Récupere Ip, Masque. Défini le réseau et le broadcast. Défini le sous-réseau si besoin.
         """
 
-        self.attStr.set("")
-        self.repFrame.place_forget()
+        self.app1strErr.set("")
+        self.app1OutputFrame.place_forget()
 
-        # Champ d'IP vide
-        if (self.textIp.get() == ""):
-            self.attStr.set("(*) Champ requis : IP" )
+        # Un des champs est vide
+        if (self.app1EntryIp.get() == ""):
+            self.app1strErr.set("(*) Champ requis : IP")
+            return
+        elif (self.hasCustomMask.get() == "on" and self.app1EntryMask.get() == ""):
+            self.app1strErr.set("(*) Champ requis : Masque de réseau")
             return
         
+        
         # Instance de Reseau
-        res = Reseau(self.textIp.get(), self.textMasque.get())
+        res = Reseau(self.app1EntryIp.get(), self.app1EntryMask.get())
+        print(res.ip, res.masque, res.adrReseau, res.adrSR)
 
         # Vérification des champs
         if (res.ip == "0.0.0.0"):
-            self.attStr.set("Adresse IP non-valide")
-        elif (res.masque == "0.0.0.0" and self.textMasque.get() != ""):
-            self.attStr.set("Masque Réseau non-valide")
+            self.app1strErr.set("Adresse IP non-valide")
+        elif (res.masque == "0.0.0.0" and self.app1EntryMask.get() != ""):
+            self.app1strErr.set("Masque Réseau non-valide")
         else:
             host = ipaddress.IPv4Address(res.ip)
             net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
-            self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{net.network_address:s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
-            self.repFrame.place(x=330, y=150)
+            print(res.ip, res.masque, res.adrReseau, res.adrSR)
+            
+            self.app1StrOutIp.set(res.ip)
+            self.app1StrOutMask.set(res.masque)
+            self.app1StrOutRes.set(f'{net.network_address:s}')
+            self.app1StrOutBrd.set(f'{net.broadcast_address:s}')
+
+            if (self.hasCustomMask.get() == "on"):
+                self.app1StrOutSR.set(f'{net.supernet(new_prefix=int(res.masque.split(".")[3]) + 1).network_address:s}')
+            else:
+                self.app1StrOutSR.set("N/A")
+
+            self.app1OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+
 
     # Fonction de reset de la frame
     def reset(self) -> None:
-        pass
-        # self.attStr.set("")
-        # self.textIp.delete(0, END)
-        # self.textMasque.delete(0, END)
-        # self.repFrame.place_forget()
+        self.app1BtnCheck.configure(state=DISABLED, cursor="tcross")
+        self.hasCustomMask.set("off")
+        self.app1EntryMask.delete(0, END)
+        self.app1EntryIp.delete(0, END)
+        self.labMask.place_forget()
+        self.app1EntryMask.place_forget()
+        self.app1OutputFrame.place_forget()
+        self.app1strErr.set("")
         
 
 class Application2(CTkFrame):
@@ -671,7 +746,7 @@ class Reseau():
     """
 
     def __init__(self, ip: str, masque: str, adrReseau: str = "0.0.0.0") -> None:
-        if (Reseau.ipValide(ip)):
+        if (Reseau.isIpValide(ip)):
             self.ip: str = ip
         else:
             self.ip: str = "0.0.0.0"
@@ -689,7 +764,6 @@ class Reseau():
                 self.masque: str = "0.0.0.0"
 
         if (Reseau.reseauValide(adrReseau)):
-            
             net = ipaddress.IPv4Network(self.ip + '/' + self.masque, False)
             # print("ip : "+self.ip+"\nMasque : "+self.masque+"\nAdresse : "+f'{net.network_address:s}')
 
@@ -917,18 +991,18 @@ class Connexion(CTkFrame):
 
     def checkConnection(self, event):
         if (self.entryConnUser.get() == "" or self.entryConnPassword.get() == ""):
-            self.btnCheckConn.configure(state=DISABLED)
+            self.btnCheckConn.configure(state=DISABLED, cursor="tcross")
             self.strConnErr.set("(*) Tous les champs sont requis")
         else:
-            self.btnCheckConn.configure(state=NORMAL)
+            self.btnCheckConn.configure(state=NORMAL, cursor="hand2")
             self.strConnErr.set("")
     
     def checkSignUp(self, event):
         if (self.entrySignUpUser.get() == "" or self.entrySignUpPassword.get() == "" or self.entrySignUpConfirm.get() == ""):
-            self.btnCheckSignUp.configure(state=DISABLED)
+            self.btnCheckSignUp.configure(state=DISABLED, cursor="tcross")
             self.strSignUpErr.set("(*) Tous les champs sont requis")
         else:
-            self.btnCheckSignUp.configure(state=NORMAL)
+            self.btnCheckSignUp.configure(state=NORMAL, cursor="hand2")
             self.strSignUpErr.set("")
 
     def createAccount(self) :
@@ -992,8 +1066,8 @@ class Connexion(CTkFrame):
         return
 
     def reset(self):
-        self.btnCheckConn.configure(state=DISABLED)
-        self.btnCheckSignUp.configure(state=DISABLED)
+        self.btnCheckConn.configure(state=DISABLED, cursor="tcross")
+        self.btnCheckSignUp.configure(state=DISABLED, cursor="tcross")
         self.entryConnUser.delete(0, END)
         self.entryConnPassword.delete(0, END)
         self.entrySignUpUser.delete(0, END)
