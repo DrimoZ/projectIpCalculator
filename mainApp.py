@@ -181,12 +181,15 @@ class HomePage(CTkFrame):
             # Cree une image Tkinter a partir de l'image PIL
             img_tk = CTkImage(img,size=(250, 250))
             # Montre l'image dans un label
-            appImglabel = CTkLabel(appFrame,image=img_tk,width=250,height=250,text="")
+            self.appImglabel = CTkLabel(appFrame,image=img_tk,width=250,height=250,text="")
 
+            # Label de description de l'application
             appDescLabel = CTkLabel(appFrame, text=list[i][2], text_color="gray", justify="center")
 
+            # Bouton d'accès à l'application
             appButton = CTkButton(appFrame, text=list[i][0],fg_color=("Black"))
 
+            # Définition des commandes des boutons
             if (i == 0):
                 appButton.configure(command = lambda : controller.show_frame(Application1))
             elif (i == 1):
@@ -194,22 +197,21 @@ class HomePage(CTkFrame):
             elif (i == 2):
                 appButton.configure(command = lambda : controller.show_frame(Application3))
 
+            # Placement des éléments
             appButton.place(x=APPFRAME_CENTER, y=FRAME_BUTTON_Y, anchor="center")
-            appButton.bind("<Double 3>", lambda eff: Palergun(appImglabel))
+            appButton.bind("<Double 3>", lambda eff: Palergun())
 
-            appImglabel.place(x=APPFRAME_CENTER, y=140, anchor="center")
+            self.appImglabel.place(x=APPFRAME_CENTER, y=140, anchor="center")
             appDescLabel.place(x=APPFRAME_CENTER, y=APPFRAME_DESC_LABEL_Y, anchor="center")
 
             appFrame.place(y=FRAME_Y_ORIGIN, x= PAD_X + i * (PAD_X + APPFRAME_SIZE_X))
 
 
-        def Palergun(lab):
-            lab.place_forget()
+        def Palergun():
             current_dir = os.path.dirname(os.path.abspath(__file__))
             img = Image.open(os.path.join(current_dir, "Image", "Palergun.png"))
             img_tk = CTkImage(img,size=(250, 250))
-            label = CTkLabel(appFrame,image=img_tk,width=250,height=250,text="")
-            label.place(x=APPFRAME_CENTER, y=140, anchor="center")
+            self.appImglabel.configure(image=img_tk)
             return
         
 
