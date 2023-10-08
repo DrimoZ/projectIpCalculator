@@ -304,7 +304,7 @@ class Application1(CTkFrame):
         labOutIp = CTkLabel(self.app1OutputFrame, text="Adresse IP : ")
         labOutIp.place(y=30, x=TITLE_OUTPUT_SIZE_X/2 - 120, anchor="w")
 
-        self.app1LblOutRes = CTkLabel(self.app1OutputFrame, textvariable=self.app1StrOutRes, text_color="green", justify="left")
+        self.app1LblOutRes = CTkLabel(self.app1OutputFrame, textvariable=self.app1StrOutIp, text_color="green", justify="left")
         self.app1LblOutRes.place(y=30, x=TITLE_OUTPUT_SIZE_X/2 + 50, anchor="w")
 
         labOutMask = CTkLabel(self.app1OutputFrame, text="Masque de réseau : ")
@@ -375,8 +375,6 @@ class Application1(CTkFrame):
         elif (res.masque == "0.0.0.0" and self.app1EntryMask.get() != ""):
             self.app1strErr.set("Masque Réseau non-valide")
         else:
-            print(res.ip, res.masque, res.adrReseau, res.adrBroadcast)
-
             self.app1StrOutIp.set(res.ip)
             self.app1StrOutMask.set(res.masque)
             self.app1StrOutRes.set(res.adrReseau)
@@ -743,7 +741,13 @@ class Reseau():
         self.adrReseau = Reseau.defineAdrReseau(self, adrReseau)
         self.adrBroadcast: str = Reseau.defineAdrBroadcast(self)
 
-        
+        # self.str()
+
+
+    
+    def str(self) -> None:
+        print("Reseau : \n\tIp : " + self.ip + "\n\tMasque : " +  self.masque + "\n\tRéseau : " +  self.adrReseau + "\n\tBroadcast : " +  self.adrBroadcast)
+
     @staticmethod
     def defineIp(self, ip: str) -> str:
         if (Reseau.isIpValide(ip)):
@@ -776,7 +780,7 @@ class Reseau():
                 return "255.255.255.0"
         else:
             # Si le masque est valide, on verifie qu'il est compatible avec l'ip
-            if (Reseau.isMasqueValide(self, masque)):
+            if (Reseau.isMasqueValide(masque)):
                 octetsMasque = masque.strip().lower().split('.')
 
                 if(int(octetsIp[0])<127 and int(octetsMasque[0])==255):
@@ -791,11 +795,12 @@ class Reseau():
                 return "0.0.0.0"
 
     @staticmethod
-    def isMasqueValide(ip: str, masque: str) -> bool:
+    def isMasqueValide(masque: str) -> bool:
         octets = masque.strip().lower().split('.')
 
         # Vérification du nombre d'octets
         if len(octets) != 4:
+            print(1)
             return False
         
         # Initialisation d'un booleen pour verifier si on a des 1 contigus // Définition de l'octet précédent
@@ -813,7 +818,7 @@ class Reseau():
                 if est_contigu:
                     if val_octet != 255:
                         # Si l'octet qui n'est pas a 255 n'est pas un des octets contigus, retourner False
-                        if not val_octet in [128, 192, 224, 240, 248, 252, 254, 255] :
+                        if not (val_octet in [0, 128, 192, 224, 240, 248, 252, 254, 255])  :
                             return False
                         
                         est_contigu = False
@@ -869,10 +874,8 @@ class Reseau():
         else:
             return "0.0.0.0"
 
-
-    def str(self) -> None:
-        print("Reseau : \n\tIp : " + self.ip + "\n\tMasque : " +  self.masque + "\n\tRéseau : " +  self.adrReseau + "\n\tBroadcast : " +  self.adrBroadcast)
-
+    
+    
 
     #
 
