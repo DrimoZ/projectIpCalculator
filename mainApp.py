@@ -221,6 +221,7 @@ class HomePage(CTkFrame):
         return
         
 
+# Application 1
 class Application1(CTkFrame):
     """
     En classfull uniquement, sur base d’une adresse IP et d’un masque, le 
@@ -402,10 +403,9 @@ class Application1(CTkFrame):
         self.app1EntryMask.place_forget()
         self.app1OutputFrame.place_forget()
 
-        self.app1strErr.set("")
-        
-        
+        self.app1strErr.set("") 
 
+# Application 2
 class Application2(CTkFrame):
     """
     Sur base d’une adresse IP et de son masque et d’une adresse de réseau, le 
@@ -625,7 +625,7 @@ class Application2(CTkFrame):
 
         self.app2strErr.set("")
 
-
+# Application 3
 class Application3(CTkFrame):
     """
     Sur base de la description d’un réseau (nombre de SR, nombre d’hôtes 
@@ -843,7 +843,7 @@ class Application3(CTkFrame):
         if hasattr(self, 'tableFrame'):
             self.tableFrame.place_forget()
 
-
+# Classe Reseau - OOP
 class Reseau():
     """
     Reprend toutes les informations et méthodes de verification/recherche/etc de réseau ou ip. 
@@ -998,7 +998,7 @@ class Reseau():
 
     #
 
-
+# Page de Connexion
 class Connexion(CTkFrame):
     # Init de la Frame
     def __init__(self, parent, controller):
