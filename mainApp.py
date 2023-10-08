@@ -132,8 +132,7 @@ class MainApplication(Tk):
     def show_frame(self, cont):
         if (getConnected()):
             frame = self.frames[cont]
-            if (not isinstance(frame, HomePage)):
-                frame.reset()
+            frame.reset()
             frame.tkraise()
         else:
             frame = self.frames[Connexion]
@@ -213,6 +212,13 @@ class HomePage(CTkFrame):
             img_tk = CTkImage(img,size=(250, 250))
             self.appImglabel.configure(image=img_tk)
             return
+        
+    def reset(self) -> None:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        img = Image.open(os.path.join(current_dir, "Image", "decoupe.png"))
+        img_tk = CTkImage(img,size=(250, 250))
+        self.appImglabel.configure(image=img_tk)
+        return
         
 
 class Application1(CTkFrame):
