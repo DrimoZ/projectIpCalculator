@@ -221,7 +221,6 @@ class HomePage(CTkFrame):
         return
         
 
->>>>>>> d8881aad93bae39dd5bf9ab7e941a6eea3bb8b1c
 class Application1(CTkFrame):
     """
     En classfull uniquement, sur base d’une adresse IP et d’un masque, le 
