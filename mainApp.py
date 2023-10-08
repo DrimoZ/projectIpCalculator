@@ -394,6 +394,7 @@ class Application1(CTkFrame):
         self.app1OutputFrame.place_forget()
         self.app1strErr.set("")
         
+        
 
 class Application2(CTkFrame):
     """
@@ -874,7 +875,7 @@ class Reseau():
         else:
             return "0.0.0.0"
 
-    
+
     
 
     #
