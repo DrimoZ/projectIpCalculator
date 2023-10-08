@@ -159,17 +159,17 @@ class HomePage(CTkFrame):
                 appButton.configure(command = lambda : controller.show_frame(Application3))
 
             label.grid(row = 1, column = i,padx=10)
-            appButton.bind("<Double 3>", lambda eff: Palergun(label))
+            appButton.bind("<Double 3>", lambda eff: Palergun(label,i))
             appButton.grid(row = 2, column = i,pady=30)
             frame.grid(row = 1, column = i)
 
-        def Palergun(lab):
+        def Palergun(lab,j):
             lab.grid_remove()
             current_dir = os.path.dirname(os.path.abspath(__file__))
             img = Image.open(os.path.join(current_dir, "Image", "Palergun.png"))
             img_tk = CTkImage(img,size=(300, 300))
             label = CTkLabel(frame,image=img_tk,width=300,height=300,text="")
-            label.grid(row = 1, column = i,padx=10)
+            label.grid(row = 1, column = j,padx=10)
             return    
   
 class Application1(CTkFrame):
