@@ -44,6 +44,8 @@ FRAME_BUTTON_Y = FRAME_SIZE_Y - PAD_Y
 APPFRAME_SIZE_X = (SIZE_X - (APP_COUNT + 1) * PAD_X) / APP_COUNT
 APPFRAME_CENTER = APPFRAME_SIZE_X / 2
 
+APPFRAME_DESC_LABEL_Y = FRAME_SIZE_Y - 3 * PAD_Y
+
 INPUTFRAME_SIZE_X = (SIZE_X - 3 * PAD_X) / 4 * 1.5
 TITLE_OUTPUT_SIZE_X = SIZE_X - 3 * PAD_X - INPUTFRAME_SIZE_X 
 
@@ -162,10 +164,11 @@ class HomePage(CTkFrame):
         #Titre du Programme
         CTkLabel(self, text="Réseau - Ip : Vérificateur d'Ip - 2023/2024", font=CTkFont("Times", 29, "bold", underline=True)).place(y=TITLE_PLACEMENT_Y, x=CENTER_WINDOW, anchor="center")
 
+        #3 applications
         list = [
-            ["Application 1", "IPFinder.png"],
-            ["Application 2", "computer-network.png"],
-            ["Application 3", "decoupe.png"],
+            ["Application 1", "IPFinder.png", "Trouve les informations nécessaires par rapport\nà une ip donnée et un masque (facultatif)."],
+            ["Application 2", "computer-network.png", "Vérifie si une ip est dans un réseau \n(ou dans un sous-réseau si découpe)."],
+            ["Application 3", "decoupe.png", "Crée une découpe de sous-réseau\nen fonction des paramètres données."],
         ]
 
         for i in range(0, len(list)):
@@ -175,16 +178,15 @@ class HomePage(CTkFrame):
             #Creation de l'image
             current_dir = os.path.dirname(os.path.abspath(__file__))
             img = Image.open(os.path.join(current_dir, "Image", list[i][1]))
-            img = img.resize((200, 200), Image.Resampling.LANCZOS)
-            img_tk = ImageTk.PhotoImage(img)
+            # Cree une image Tkinter a partir de l'image PIL
+            img_tk = CTkImage(img,size=(250, 250))
+            # Montre l'image dans un label
+            appImglabel = CTkLabel(appFrame,image=img_tk,width=250,height=250,text="")
 
-            #Chargement de l'image
-            label = Label(appFrame,image=img_tk,width=250,height=250)
-            label.image = img_tk
-                
-            label.place(x=APPFRAME_CENTER, y=140, anchor="center")
+            appDescLabel = CTkLabel(appFrame, text=list[i][2], text_color="gray", justify="center")
 
-            appButton = CTkButton(appFrame, text =list[i][0], cursor="hand2")
+            appButton = CTkButton(appFrame, text=list[i][0],fg_color=("Black"))
+
             if (i == 0):
                 appButton.configure(command = lambda : controller.show_frame(Application1))
             elif (i == 1):
@@ -193,10 +195,24 @@ class HomePage(CTkFrame):
                 appButton.configure(command = lambda : controller.show_frame(Application3))
 
             appButton.place(x=APPFRAME_CENTER, y=FRAME_BUTTON_Y, anchor="center")
+            appButton.bind("<Double 3>", lambda eff: Palergun(appImglabel))
+
+            appImglabel.place(x=APPFRAME_CENTER, y=140, anchor="center")
+            appDescLabel.place(x=APPFRAME_CENTER, y=APPFRAME_DESC_LABEL_Y, anchor="center")
+
             appFrame.place(y=FRAME_Y_ORIGIN, x= PAD_X + i * (PAD_X + APPFRAME_SIZE_X))
 
 
-# Présence d'une IP dans le réseau
+        def Palergun(lab):
+            lab.place_forget()
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            img = Image.open(os.path.join(current_dir, "Image", "Palergun.png"))
+            img_tk = CTkImage(img,size=(250, 250))
+            label = CTkLabel(appFrame,image=img_tk,width=250,height=250,text="")
+            label.place(x=APPFRAME_CENTER, y=140, anchor="center")
+            return
+        
+
 class Application1(CTkFrame):
     """
     En classfull uniquement, sur base d’une adresse IP et d’un masque, le 
