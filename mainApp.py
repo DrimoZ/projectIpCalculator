@@ -375,16 +375,12 @@ class Application1(CTkFrame):
         elif (res.masque == "0.0.0.0" and self.app1EntryMask.get() != ""):
             self.app1strErr.set("Masque Réseau non-valide")
         else:
-            host = ipaddress.IPv4Address(res.ip)
-            net = ipaddress.IPv4Network(res.ip + '/' + res.masque, False)
-            print(res.ip, res.masque, res.adrReseau, res.adrSR)
-            
+            print(res.ip, res.masque, res.adrReseau, res.adrBroadcast)
+
             self.app1StrOutIp.set(res.ip)
             self.app1StrOutMask.set(res.masque)
-            self.app1StrOutRes.set(f'{net.network_address:s}')
-            self.app1StrOutBrd.set(f'{net.broadcast_address:s}')
-
-            
+            self.app1StrOutRes.set(res.adrReseau)
+            self.app1StrOutBrd.set(res.adrBroadcast)
 
             self.app1OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
 
@@ -489,7 +485,7 @@ class Application2(CTkFrame):
             self.attStr.set("Masque Réseau non-valide")
         elif (res.adrReseau == "0.0.0.0"):
             self.attStr.set("Adresse Réseau non-valide")
-        elif (res.adrReseau == "NON"):
+        elif (res.adrReseau == "-1"):
             self.rep.set("Pas dans le même réseau")
             self.repFrame.place(x=330, y=150)
         else:
@@ -741,28 +737,13 @@ class Reseau():
     - Adresse du Sous Réseau
     """
 
-    def __init__(self, ip: str, masque: str, adrReseau: str = "0.0.0.0") -> None:
+    def __init__(self, ip: str, masque: str, adrReseau: str = "0") -> None:
         self.ip = Reseau.defineIp(self, ip)
         self.masque = Reseau.defineMasque(self, masque)
+        self.adrReseau = Reseau.defineAdrReseau(self, adrReseau)
+        self.adrBroadcast: str = Reseau.defineAdrBroadcast(self)
 
         
-
-        if (Reseau.reseauValide(adrReseau)):
-            net = ipaddress.IPv4Network(self.ip + '/' + self.masque, False)
-            # print("ip : "+self.ip+"\nMasque : "+self.masque+"\nAdresse : "+f'{net.network_address:s}')
-
-            if(adrReseau==f'{net.network_address:s}'):
-                self.adrReseau: str = adrReseau
-            else:
-                self.adrReseau:str = "NON"
-        else:
-            self.adrReseau: str = "0.0.0.0"
-
-        self.adrBroadCast: str = "0.0.0.0"
-        self.adrSR: str = "0.0.0.0"
-
-
-
     @staticmethod
     def defineIp(self, ip: str) -> str:
         if (Reseau.isIpValide(ip)):
@@ -851,8 +832,25 @@ class Reseau():
                    
         return True
 
+    @staticmethod
+    def defineAdrReseau(self, adrReseau: str) -> str:
+        net = ipaddress.IPv4Network(self.ip + '/' + self.masque, False)
+
+        # Si pas de réseau donné, on le défini en fonction de l'ip et du masque
+        if (adrReseau == "0"):
+            return f'{net.network_address:s}'
+        
+        # Si un réseau est donné, on vérifie qu'il est valide et qu'il correspond à l'ip et au masque
+        if (Reseau.reseauValide(adrReseau)):
+            if(adrReseau==f'{net.network_address:s}'):
+                return adrReseau
+            else:
+                # Return -1 pour l'application 2
+                return "-1"
+        else:
+            return "0.0.0.0"
     
-       
+    @staticmethod
     def reseauValide(adrReseau: str) -> bool:
         try:
             ip_object = ipaddress.ip_address(adrReseau) 
@@ -862,6 +860,22 @@ class Reseau():
             return True
         except ValueError:
             return False
+
+    @staticmethod
+    def defineAdrBroadcast(self) -> str:
+        if (self.adrReseau != "0.0.0.0" and self.adrReseau != "-1"):
+            net = ipaddress.IPv4Network(self.ip + '/' + self.masque, False)
+            return f'{net.broadcast_address:s}'
+        else:
+            return "0.0.0.0"
+
+
+    def str(self) -> None:
+        print("Reseau : \n\tIp : " + self.ip + "\n\tMasque : " +  self.masque + "\n\tRéseau : " +  self.adrReseau + "\n\tBroadcast : " +  self.adrBroadcast)
+
+
+    #
+
 
 class Connexion(CTkFrame):
     # Init de la Frame
