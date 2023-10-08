@@ -17,11 +17,15 @@ ctk.set_default_color_theme("green")
 set_appearance_mode("dark") 
 set_default_color_theme("green")
 
+APP_COUNT = 3
+
 PAD_X = 30
 PAD_Y = 30
 
 SIZE_X = 1000
 SIZE_Y = 560
+
+FRAME_CORNER_RADIUS = 25
 
 CENTER_WINDOW = SIZE_X / 2
 FRAME_SIZE_X = SIZE_X - 2 * PAD_X
@@ -34,9 +38,33 @@ TITLE_PLACEMENT_Y = PAD_Y
 CONNECTION_FRAME_CENTER = CONNECTION_FRAME_SIZE_X / 2
 SIGNUP_FRAME_CENTER = SIGNUP_FRAME_SIZE_X / 2
 
-FRAME_Y_ORIGIN = 90
+FRAME_Y_ORIGIN = 3 * PAD_Y
+FRAME_BUTTON_Y = FRAME_SIZE_Y - PAD_Y
 
+APPFRAME_SIZE_X = (SIZE_X - (APP_COUNT + 1) * PAD_X) / APP_COUNT
+APPFRAME_CENTER = APPFRAME_SIZE_X / 2
+
+INPUTFRAME_SIZE_X = (SIZE_X - 3 * PAD_X) / 4 * 1.5
+TITLE_OUTPUT_SIZE_X = SIZE_X - 3 * PAD_X - INPUTFRAME_SIZE_X 
+
+TITLE_FRAME_SIZE_Y = 120
+OUTPUT_FRAME_SIZE_Y = SIZE_Y - 4 * PAD_Y - TITLE_FRAME_SIZE_Y
+
+INPUTFRAME_CENTER = INPUTFRAME_SIZE_X / 2
+
+
+
+
+
+
+
+
+# Gestion du statut de connexion
 isConnected = False
+
+def getConnected():
+    global isConnected
+    return isConnected
 
 def setConnected():
     global isConnected
@@ -45,10 +73,6 @@ def setConnected():
     app.disconnectButton.config(state= NORMAL, cursor="hand2", command=setDisconnected)
     app.show_frame(HomePage)
 
-def getConnected():
-    global isConnected
-    return isConnected
-
 def setDisconnected():
     global isConnected
     isConnected = False
@@ -56,7 +80,15 @@ def setDisconnected():
     app.disconnectButton.config(state= DISABLED, cursor="tcross")
     app.show_frame(Connexion)
 
+# Check Inputs - Allow only Digits or "."
+def verifCaracter(P):
+    if str.isdigit(P) or P == "" or P == ".":
+        return True
+    else:
+        return False
 
+
+# ROOT
 class MainApplication(Tk):
     """
     Main Application Class - Root
@@ -109,7 +141,6 @@ class MainApplication(Tk):
     def ouvrir_github(self):
         webbrowser.open("https://github.com/DrimoZ/projectIpCalculator")
         
-  
 # Page d'acceuil
 class HomePage(CTkFrame):
     """
@@ -124,11 +155,12 @@ class HomePage(CTkFrame):
     une base de données (module sqlite3 pour Python) bénéficieront d’un 
     bonus
     """
+
     def __init__(self, parent, controller):
         CTkFrame.__init__(self, parent)
 
-        label = Label(self, text ="Application en Python pour le cours de Reseau/IP - 2023/2024", font = 'Times 19', borderwidth=1, relief="solid")
-        label.grid(row = 0, column = 0,  columnspan = 3, padx = 10, pady = 10)
+        #Titre du Programme
+        CTkLabel(self, text="Réseau - Ip : Vérificateur d'Ip - 2023/2024", font=CTkFont("Times", 29, "bold", underline=True)).place(y=TITLE_PLACEMENT_Y, x=CENTER_WINDOW, anchor="center")
 
         list = [
             ["Application 1", "IPFinder.png"],
@@ -137,39 +169,34 @@ class HomePage(CTkFrame):
         ]
 
         for i in range(0, len(list)):
-            self.grid_columnconfigure(i, weight=1)
-            frame = CTkFrame(self)
+            #Frame par application
+            appFrame = CTkFrame(self, width=APPFRAME_SIZE_X, height=FRAME_SIZE_Y, corner_radius=FRAME_CORNER_RADIUS)
 
-            # Convert the image data into a PIL Image
+            #Creation de l'image
             current_dir = os.path.dirname(os.path.abspath(__file__))
             img = Image.open(os.path.join(current_dir, "Image", list[i][1]))
-
-            # Resize the image to your desired dimensions (e.g., 300x300 pixels)
-            img = img.resize((250, 250), Image.Resampling.LANCZOS)
-
-            # Create a Tkinter PhotoImage object from the PIL Image
+            img = img.resize((200, 200), Image.Resampling.LANCZOS)
             img_tk = ImageTk.PhotoImage(img)
 
-            # , borderwidth=1, relief="solid", justify="center", width=200,height=200
-            label = Label(frame,image=img_tk,width=300,height=300)
-            
-            # Display the image in a Label widget
-            label.config(image=img_tk)
+            #Chargement de l'image
+            label = Label(appFrame,image=img_tk,width=250,height=250)
             label.image = img_tk
                 
-            label.grid(row = 1, column = 0)
+            label.place(x=APPFRAME_CENTER, y=140, anchor="center")
 
-            appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid", cursor="hand2")
+            appButton = CTkButton(appFrame, text =list[i][0], cursor="hand2")
             if (i == 0):
-                appButton.config(command = lambda : controller.show_frame(Application1))
+                appButton.configure(command = lambda : controller.show_frame(Application1))
             elif (i == 1):
-                appButton.config(command = lambda : controller.show_frame(Application2))
+                appButton.configure(command = lambda : controller.show_frame(Application2))
             elif (i == 2):
-                appButton.config(command = lambda : controller.show_frame(Application3))
+                appButton.configure(command = lambda : controller.show_frame(Application3))
 
-            appButton.grid(row = 2, column = 0, padx = 10, pady = 10)
-            frame.grid(row = 1, column = i, padx = 10, pady = 10)
-  
+            appButton.place(x=APPFRAME_CENTER, y=FRAME_BUTTON_Y, anchor="center")
+            appFrame.place(y=FRAME_Y_ORIGIN, x= PAD_X + i * (PAD_X + APPFRAME_SIZE_X))
+
+
+# Présence d'une IP dans le réseau
 class Application1(CTkFrame):
     """
     En classfull uniquement, sur base d’une adresse IP et d’un masque, le 
@@ -177,59 +204,71 @@ class Application1(CTkFrame):
     réseau. Si une découpe en sous-réseau est réalisée, le programme doit 
     déterminer l’adresse de SR
     """
+
     def __init__(self, parent, controller):
         CTkFrame.__init__(self, parent)
 
-        # Frame - Données d'entrée
-        self.infoFrame = CTkFrame(master=self, width=270, height=170)
-        self.infoFrame.grid_propagate(0)
-
-        # Labels
-        labIp = Label(self.infoFrame, text="Adresse Ip * : ", width=15)
-        labIp.grid(row = 1, column = 0, padx = 10, pady = 10)
-        labMasque = Label(self.infoFrame, text="Masque SR : ", width=15)
-        labMasque.grid(row = 2, column = 0, padx = 10, pady = 10)
-
-        # Entries
-        vcmd = (self.register(self.verifCaracter))
-        self.textIp = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
-        self.textIp.grid(row = 1, column = 1, pady = 10)
-        self.textMasque = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
-        self.textMasque.grid(row = 2, column = 1, pady = 10)
-
-        # Label d'erreur
-        self.attStr = StringVar()
-        self.attStr.set("")
-        lblVerif = Label(self.infoFrame, textvariable=self.attStr, justify="center", fg="red")
-        lblVerif.grid(row = 4, column = 0, columnspan=2, padx = 10, pady = 10)
-
-        # Bouton de vérification
-        btnCheck = Button(self.infoFrame, text="Trouver le réseau", cursor="hand2") 
-        btnCheck.config(command= lambda: self.trouverReseau())
-        btnCheck.grid(row = 5, column = 0, columnspan=2, padx = 10, pady = 10)
-
-        # Fin de la Frame d'entrée
-        self.infoFrame.place(x=30, y=30)
+        #Declaraction des Frames
+        self.app1InputFrame = CTkFrame(self, width=INPUTFRAME_SIZE_X, height=FRAME_SIZE_Y, corner_radius=FRAME_CORNER_RADIUS)
+        self.app1OutputFrame = CTkFrame(self, width=TITLE_OUTPUT_SIZE_X, height=OUTPUT_FRAME_SIZE_Y, corner_radius=FRAME_CORNER_RADIUS)
+        app1TitleFrame = CTkFrame(self, width=TITLE_OUTPUT_SIZE_X, height=TITLE_FRAME_SIZE_Y, corner_radius=FRAME_CORNER_RADIUS)
 
 
-        #Frame de Titre
-        titleFrame = CTkFrame(master=self, width=SIZE_X-360, height=90)
-        titleFrame.grid_propagate(0)
-        titleFrame.place(x=330, y=30)
-
-        #Labels - Titre
-        lblTitre = Label(titleFrame, text="Application 1 : Détermination du Réseau", font = 'Times 14 underline' )
-        lblTitre.place(x=10, y=10)
-        lblExo = Label(titleFrame, fg='blue', text="Sur base d’une IP et d’un masque (facultatif), fournit l’adresse de réseau et le broadcast\ndu réseau. Si une découpe en sous-réseau est réalisée, détermine l’adresse du sous-réseau.", font = 'Times 11 italic', justify="left" )
+        # Titre
+        lblTitre = CTkLabel(app1TitleFrame, text="Application 1 : Déterminer le Réseau", font = CTkFont("Times", 21, underline=True))
+        lblTitre.place(x=12, y=10)
+        app1Description = "Sur base d’une IP et d’un masque (facultatif), fournit l’adresse de réseau\net le broadcast du réseau. Si une découpe en sous-réseau est réalisée,\ndétermine l’adresse du sous-réseau."
+        lblExo = CTkLabel(app1TitleFrame, text_color='cyan', text=app1Description, font = CTkFont("Times", 17, slant="italic"), justify="left" )
         lblExo.place(x=10, y=40)
 
-        #Frame - Reponses
-        self.repFrame = CTkFrame(master=self, width=SIZE_X-360, height=300)
-        self.repFrame.grid_propagate(0)
 
-        self.rep = StringVar()
-        lblVerif = Label(self.repFrame, textvariable=self.rep, justify="center", fg="red")
-        lblVerif.place(x=0, y=0)
+        # Inputs
+        vcmd = (self.register(verifCaracter))
+
+        labIp = CTkLabel(self.app1InputFrame, text="Entrer les informations\nrequises pour l'application", text_color="gray")
+        labIp.place(y=30, x=INPUTFRAME_CENTER, anchor="center")
+
+        labIp = CTkLabel(self.app1InputFrame, text="Adresse Ip")
+        labIp.place(y=90, x=INPUTFRAME_CENTER, anchor="center")
+
+        self.app1EntryIp = CTkEntry(self.app1InputFrame, width=200, validate="key", validatecommand=(vcmd, '%S'))
+        self.app1EntryIp.place(y=120, x=INPUTFRAME_CENTER, anchor="center")
+
+        # check = tk.Checkbutton(self, text="Découpe en sous-réseaux ?", variable=var, onvalue=1, offvalue=0, command=lambda: afficherMasque(var.get()))
+
+        check_var = StringVar()
+        checkbox = CTkCheckBox(self.app1InputFrame, text="CTkCheckBox", variable=check_var, onvalue="on", offvalue="off")
+        checkbox.place(y=170, x=INPUTFRAME_CENTER, anchor="center")
+        
+        def checkbox_event():
+            print("checkbox toggled, current value:", check_var.get())
+
+        
+
+        # Entries
+        # self.textMasque = Entry(self.infoFrame, width=20, validate="key", validatecommand=(vcmd, '%S'))
+        # self.textMasque.grid(row = 2, column = 1, pady = 10)
+
+        # Label d'erreur
+        # self.attStr = StringVar()
+        # self.attStr.set("")
+        # lblVerif = Label(self.infoFrame, textvariable=self.attStr, justify="center", fg="red")
+        # lblVerif.grid(row = 4, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        # Bouton de vérification
+        # btnCheck = Button(self.infoFrame, text="Trouver le réseau", cursor="hand2") 
+        # btnCheck.config(command= lambda: self.trouverReseau())
+        # btnCheck.grid(row = 5, column = 0, columnspan=2, padx = 10, pady = 10)
+
+        # self.rep = StringVar()
+        # lblVerif = Label(self.repFrame, textvariable=self.rep, justify="center", fg="red")
+        # lblVerif.place(x=0, y=0)
+
+        #Placement des frames
+        self.app1InputFrame.place(x = PAD_X, y = PAD_Y)
+        self.app1OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+        app1TitleFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = PAD_Y)
+
 
     def trouverReseau(self) -> None :
         """
@@ -258,18 +297,13 @@ class Application1(CTkFrame):
             self.rep.set("Adresse IP  : "+res.ip+"\nMasque de réseau : "+res.masque+"\nAdresse de réseau : "+f'{net.network_address:s}'+"\nAdresse de broadcast : "+f'{net.broadcast_address:s}')
             self.repFrame.place(x=330, y=150)
 
-    def verifCaracter(self, P):
-        if str.isdigit(P) or P == "" or P == ".":
-            return True
-        else:
-            return False
-        
     # Fonction de reset de la frame
     def reset(self) -> None:
-        self.attStr.set("")
-        self.textIp.delete(0, END)
-        self.textMasque.delete(0, END)
-        self.repFrame.place_forget()
+        pass
+        # self.attStr.set("")
+        # self.textIp.delete(0, END)
+        # self.textMasque.delete(0, END)
+        # self.repFrame.place_forget()
         
 
 class Application2(CTkFrame):
@@ -479,17 +513,17 @@ class Application3(CTkFrame):
 
         #en fonction du nombre de champs requis, on redimensionne la frame
         if (self.textReseau.get() == "" and self.textSR.get() == "" and self.textHotes.get() == ""):
-            self.infoFrame.config(height=300)
+            self.infoFrame.configure(height=300)
         elif (self.textReseau.get() == "" and self.textSR.get() == ""):
-            self.infoFrame.config(height=290)
+            self.infoFrame.configure(height=290)
         elif (self.textReseau.get() == "" and self.textHotes.get() == ""):
-            self.infoFrame.config(height=290)
+            self.infoFrame.configure(height=290)
         elif (self.textSR.get() == "" and self.textHotes.get() == ""):
-            self.infoFrame.config(height=290)
+            self.infoFrame.configure(height=290)
         elif (self.textReseau.get() == "" or self.textSR.get() == "" or self.textHotes.get() == ""):
-            self.infoFrame.config(height=270)
+            self.infoFrame.configure(height=270)
         else:
-            self.infoFrame.config(height=250)
+            self.infoFrame.configure(height=250)
 
         if (self.textReseau.get() == "" or self.textSR.get() == "" or self.textHotes.get() == ""):
             self.attStr.set("(*) Champs requis : \n" + ("Adresse de réseau" if self.textReseau.get() == "" else "") + ("\n" if self.textReseau.get() == "" and self.textSR.get() == "" else "") + ("Nombre de SR souhaités" if self.textSR.get() == "" else "") + ("\n" if self.textSR.get() == "" and self.textHotes.get() == "" else "") + ("Nombre d'Hôtes par SR" if self.textHotes.get() == "" else ""))
@@ -644,7 +678,20 @@ class Reseau():
         
         self.adrBroadCast: str = "0.0.0.0"
         self.adrSR: str = "0.0.0.0"
-        
+
+
+    @staticmethod
+    def isIpValide(ip: str) -> bool:
+        try:
+            ip_object = ipaddress.ip_address(ip) 
+            octets = ip.strip().lower().split('.')
+            if(int(octets[0])==127 or int(octets[0])==0):
+                return False
+            return True
+        except ValueError:
+            return False
+
+      
     def ipValide(ip: str) -> bool:
         try:
             ip_object = ipaddress.ip_address(ip) 
@@ -655,6 +702,7 @@ class Reseau():
         except ValueError:
             return False
 
+    
     def masqueValide(self, masque: str) -> bool:
         octets = masque.strip().lower().split('.')
 
@@ -701,6 +749,7 @@ class Reseau():
         
         octetsIP = self.ip.strip().lower().split('.')
         octets = masque.strip().lower().split('.')
+
         if(int(octetsIP[0])<127):
             if(int(octets[0])==255):
                 self.masque: str = masque
@@ -766,10 +815,8 @@ class Connexion(CTkFrame):
 
 
         #Declaraction des Frames
-        self.inFrame = CTkFrame(master=self, width=CONNECTION_FRAME_SIZE_X, height=FRAME_SIZE_Y, corner_radius=25)
-        self.inFrame.grid_propagate(0)
-        self.upFrame = CTkFrame(master=self, width=SIGNUP_FRAME_SIZE_X, height=FRAME_SIZE_Y, corner_radius=25)
-        self.upFrame.grid_propagate(0)
+        self.inFrame = CTkFrame(master=self, width=CONNECTION_FRAME_SIZE_X, height=FRAME_SIZE_Y, corner_radius=FRAME_CORNER_RADIUS)
+        self.upFrame = CTkFrame(master=self, width=SIGNUP_FRAME_SIZE_X, height=FRAME_SIZE_Y, corner_radius=FRAME_CORNER_RADIUS)
 
 
         #Label - Sous-Titre
@@ -796,7 +843,7 @@ class Connexion(CTkFrame):
         self.entryConnPassword.bind("<Key>", self.checkConnection)
 
         self.btnCheckConn = CTkButton(self.inFrame, text="Se Connecter", cursor="hand2",command= lambda: self.connect(), state=DISABLED)
-        self.btnCheckConn.place(y=FRAME_SIZE_Y - 2*PAD_Y, x=CONNECTION_FRAME_CENTER, anchor="center")
+        self.btnCheckConn.place(y=FRAME_BUTTON_Y - PAD_Y, x=CONNECTION_FRAME_CENTER, anchor="center")
 
         self.strConnErr = StringVar()
         self.strConnErr.set("")
@@ -831,7 +878,7 @@ class Connexion(CTkFrame):
         self.entrySignUpConfirm.bind("<Key>", self.checkSignUp)
 
         self.btnCheckSignUp = CTkButton(self.upFrame, text="Créer un nouveau compte", cursor="hand2", command= lambda: self.createAccount(), state=DISABLED)
-        self.btnCheckSignUp.place(y=FRAME_SIZE_Y - 2*PAD_Y, x=SIGNUP_FRAME_CENTER, anchor="center")
+        self.btnCheckSignUp.place(y=FRAME_BUTTON_Y - PAD_Y, x=SIGNUP_FRAME_CENTER, anchor="center")
 
         self.strSignUpErr = StringVar()
         self.strSignUpErr.set("")
