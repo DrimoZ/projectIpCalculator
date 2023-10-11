@@ -133,6 +133,7 @@ class HomePage(CTkFrame):
             #Creation de l'image
             current_dir = os.path.dirname(os.path.abspath(__file__))
             img = Image.open(os.path.join(current_dir, "images", list[i][1]))
+
             # Cree une image Tkinter a partir de l'image PIL
             img_tk = CTkImage(img,size=(250, 250))
             # Montre l'image dans un label
