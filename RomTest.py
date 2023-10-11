@@ -1,41 +1,40 @@
-from tkinter import *
+import tkinter as tk
 
-<<<<<<< HEAD
-var = Tk()
+class MainApplication(tk.Tk):
+    def __init__(self):
+        tk.Tk.__init__(self)
+        self.title("Changer de Frame")
 
-def leftclick(event):
+        self.frames = {}
+        for F in (PageOne, PageTwo):
+            frame = F(self)
+            self.frames[F] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
 
-    print("left")
+        self.show_frame(PageOne)
 
-def middleclick(event):
+    def show_frame(self, cont):
+        frame = self.frames[cont]
+        frame.tkraise()
 
-    print("middle")
+class PageOne(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent, bd=2, relief="solid")
+        label = tk.Label(self, text="Cliquez sur cette page pour aller à la Page 2", font=("Helvetica", 14), fg="blue", cursor="hand2")
+        label.pack(pady=10, padx=10)
+        label.bind("<Button-1>", lambda event, cont=PageTwo: parent.show_frame(cont))
 
-def rightclick(event):
+        self.bind("<Button-1>", lambda event, cont=PageTwo: parent.show_frame(cont))
 
-    print("right")
+class PageTwo(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent, bd=2, relief="solid")
+        label = tk.Label(self, text="Cliquez sur cette page pour revenir à la Page 1", font=("Helvetica", 14), fg="blue", cursor="hand2")
+        label.pack(pady=10, padx=10)
+        label.bind("<Button-1>", lambda event, cont=PageOne: parent.show_frame(cont))
 
-frame = Frame(var, width=300, height=250)
+        self.bind("<Button-1>", lambda event, cont=PageOne: parent.show_frame(cont))
 
-frame.bind("<Button-1>", leftclick)
-
-frame.bind("<Button-2>", middleclick)
-
-frame.bind("<Button-3>", rightclick)
-
-frame.pack()
-
-var.mainloop()
-=======
-def motion(event):
-  print("Mouse position: (%s %s)" % (event.x, event.y))
-  return
-
-master = Tk()
-whatever_you_do = "Whatever you do will be insignificant, but it is very important that you do it.\n(Mahatma Gandhi)"
-msg = Message(master, text = whatever_you_do)
-msg.config(bg='lightgreen', font=('times', 24, 'italic'))
-msg.bind('<Motion>',motion)
-msg.pack()
-mainloop()
->>>>>>> 451f9e73629306eaf0a6ecb243ee9b1f8a9edea6
+if __name__ == "__main__":
+    app = MainApplication()
+    app.mainloop()

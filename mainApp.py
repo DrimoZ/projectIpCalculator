@@ -143,32 +143,30 @@ class HomePage(CTkFrame):
             # Convert the image data into a PIL Image
             current_dir = os.path.dirname(os.path.abspath(__file__))
             img = Image.open(os.path.join(current_dir, "Image", list[i][1]))
-
-            # Resize the image to your desired dimensions (e.g., 300x300 pixels)
-            img = img.resize((250, 250), Image.Resampling.LANCZOS)
-
+            
             # Create a Tkinter PhotoImage object from the PIL Image
-            img_tk = ImageTk.PhotoImage(img)
+            img_tk = CTkImage(dark_image=img,light_image=img,size=(250,250))
 
             # , borderwidth=1, relief="solid", justify="center", width=200,height=200
-            label = Label(frame,image=img_tk,width=300,height=300)
+            label = CTkLabel(frame,width=300,height=300)
             
-            # Display the image in a Label widget
-            label.config(image=img_tk)
-            label.image = img_tk
                 
             # label.grid(row = 1, column = 0)
 
-            appButton = Button(frame, text =list[i][0], borderwidth=1, relief="solid", cursor="hand2",image=img_tk)
-            if (i == 0):
-                appButton.config(command = lambda : controller.show_frame(Application1))
-            elif (i == 1):
-                appButton.config(command = lambda : controller.show_frame(Application2))
-            elif (i == 2):
-                appButton.config(command = lambda : controller.show_frame(Application3))
+            appButton = CTkButton(frame, text =list[i][0], image=img_tk)
+            # if (i == 0):
+            #     appButton.configure(command = lambda : controller.show_frame(Application1))
+            # elif (i == 1):
+            #     appButton.configure(command = lambda : controller.show_frame(Application2))
+            # elif (i == 2):
+            #     appButton.configure(command = lambda : controller.show_frame(Application3))
 
             appButton.grid(row = 2, column = 0, padx = 10, pady = 10)
+            self.bind("<Button-1>", lambda event, cont=Application2: parent.show_frame(Application2))
+
             frame.grid(row = 1, column = i, padx = 10, pady = 10)
+
+
   
 class Application1(CTkFrame):
     """
