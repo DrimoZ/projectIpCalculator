@@ -1,3 +1,4 @@
+
 import ipaddress
 
 # Saisie de l'adresse IP et du masque de sous-réseau au format CIDR (par exemple, 192.168.1.0/24)
