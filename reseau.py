@@ -27,14 +27,16 @@ class Reseau():
 
     
     def str(self) -> None:
-        print("Reseau : \n\tIp : " + self.ip 
-              + "\n\tMasque : " +  self.netMask 
-              + "\n\tRéseau : " +  self.netAddress 
-              + "\n\tBroadcast : " +  self.netBroadcast
-              + "\n\tHotes max : " +  str(self.maxNetHosts)
-            #   + "\n\tSR voulus : " +  str(self.wantedSubnets)
-            #   + "\n\tHotes voulus par SR : " +  str(self.wantedHosts)
-            #   + "\n\tDefinition des SR par le nombre d'hotes : " +  str(self.isSubnetFromHosts)
+        print(self.subnets is None)
+        print(
+            "Reseau : \n\tIp : " + self.ip 
+               + "\n\tMasque : " +  self.netMask 
+               + "\n\tRéseau : " +  self.netAddress 
+               + "\n\tBroadcast : " +  self.netBroadcast
+               + "\n\tHotes max : " +  str(self.maxNetHosts)
+               + "\n\tSR voulus : " +  self.subnets
+            #    + "\n\tHotes voulus par SR : " +  str(self.wantedHosts)
+            #    + "\n\tDefinition des SR par le nombre d'hotes : " +  str(self.isSubnetFromHosts)
               
               )
 
@@ -164,20 +166,29 @@ class Reseau():
         else:
             return DEFAULT_NET_IP
         
-    # @staticmethod
-    # def defineMaxHosts(self) -> int:
-        # if (self.adrReseau != DEFAULT_NET_IP and self.adrReseau != "-1" and self.masque != DEFAULT_NET_IP):
-            # net = ipaddress.IPv4Network(self.adrReseau + '/' + self.masque, False)
-            # return net.num_addresses - 2
-        # return 0
-
     @staticmethod
-    def defineSubnets(self, fromHosts, nbHosts, nbSubnets) -> list:
+    def defineSubnets(self, nbHosts, nbSubnets, fromHosts):
         if (self.netAddress != DEFAULT_NET_IP and self.netAddress != "-1" and self.netMask != DEFAULT_NET_IP):
             net = ipaddress.IPv4Network(self.netAddress + '/' + self.netMask, False)
             self.maxNetHosts = net.num_addresses - 2
-        
 
+            minHostPerSubnet = 2
+
+            while (True):
+                if (nbHosts + 2 <= minHostPerSubnet):
+                    break
+                else :
+                    minHostPerSubnet *= 2
+
+
+            #Check if we can generate subnets with the given number of hosts and subnets
+            if (self.maxNetHosts > minHostPerSubnet * nbSubnets):
+                # Ici gen les subnets avec le nombre d'hotes et de sr 
+                pass
+
+            else:
+                #ici mettre en fonction de fromHosts (boolean) une gen en fonction du nb de subnet ou de hossts
+                pass
         else:
             return []
 

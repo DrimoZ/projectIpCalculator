@@ -503,7 +503,8 @@ class Application2(CTkFrame):
             return
         
         # Instance de Reseau
-        res = Reseau(self.app2EntryIp.get(), self.app2EntryMask.get(), self.app2EntryRes.get())
+        print(self.app2EntryIp.get())
+        res = Reseau(self.app2EntryIp.get(), self.app2EntryMask.get() if self.hasCustomMask.get() == "on" else "", self.app2EntryRes.get())
 
         # Vérification des champs
         if (res.ip == "0.0.0.0"):
@@ -579,44 +580,43 @@ class Application3(CTkFrame):
         labIntro = CTkLabel(self.app3InputFrame, text="Entrer les informations\nrequises pour l'application", text_color="gray")
         labIntro.place(y=30, x=INPUTFRAME_CENTER, anchor="center")
 
+
         labReseau = CTkLabel(self.app3InputFrame, text="Adresse du Réseau")
         labReseau.place(y=70, x=INPUTFRAME_CENTER, anchor="center")
 
-        self.app3EntryRes = CTkEntry(self.app3InputFrame, width=200, validate="key", validatecommand=(vcmd, '%S'))
-        self.app3EntryRes.place(y=100, x=INPUTFRAME_CENTER, anchor="center")
-        self.app3EntryRes.bind("<Button-1>", self.checkEntries)
-
-        labSr_Hotes = CTkLabel(self.app3InputFrame, text="Paramètre de création des SR")
-        labSr_Hotes.place(y=140, x=INPUTFRAME_CENTER, anchor="center")
-
+        self.app3dataRes = StringVar()
+        self.app3dataRes.set("")
+        app3EntryRes = CTkEntry(self.app3InputFrame, width=200, validate="key", validatecommand=(vcmd, '%S'), textvariable=self.app3dataRes)
+        app3EntryRes.place(y=100, x=INPUTFRAME_CENTER, anchor="center")
+        app3EntryRes.bind("<Key>", self.checkEntries)
         
+
         self.labHotes = CTkLabel(self.app3InputFrame, text="Nombre d'hôtes souhaités par SR")
-        # self.labHotes.place(y=140, x=INPUTFRAME_CENTER, anchor="center")
+        self.labHotes.place(y=140, x=INPUTFRAME_CENTER, anchor="center")
         
-        self.app3EntryHotes = CTkEntry(self.app3InputFrame, width=200, validate="key", validatecommand=(vcmd, '%S'))
-        # self.app3EntryHotes.place(y=170, x=INPUTFRAME_CENTER, anchor="center")
-        self.app3EntryHotes.bind("<Button-1>", self.checkEntries)
+        self.app3dataHotes = StringVar()
+        self.app3dataHotes.set("")
+        app3EntryHotes = CTkEntry(self.app3InputFrame, width=200, validate="key", validatecommand=(vcmd, '%S'), textvariable=self.app3dataHotes)
+        app3EntryHotes.place(y=170, x=INPUTFRAME_CENTER, anchor="center")
+        app3EntryHotes.bind("<Key>", self.checkEntries)
         
+
         self.labSr = CTkLabel(self.app3InputFrame, text="Nombre de sous-réseaux souhaités")
-        # self.labSr.place(y=210, x=INPUTFRAME_CENTER, anchor="center")
+        self.labSr.place(y=210, x=INPUTFRAME_CENTER, anchor="center")
         
-        self.app3EntrySr = CTkEntry(self.app3InputFrame, width=200, validate="key", validatecommand=(vcmd, '%S'))
-        # self.app3EntrySr.place(y=240, x=INPUTFRAME_CENTER, anchor="center")
-        self.app3EntrySr.bind("<Button-1>", self.checkEntries)
+        self.app3dataSr = StringVar()
+        self.app3dataSr.set("")
+        app3EntrySr = CTkEntry(self.app3InputFrame, width=200, validate="key", validatecommand=(vcmd, '%S'), textvariable=self.app3dataSr)
+        app3EntrySr.place(y=240, x=INPUTFRAME_CENTER, anchor="center")
+        app3EntrySr.bind("<Key>", self.checkEntries)
+
 
         self.labMask = CTkLabel(self.app3InputFrame, text="Masque de Sous-Réseau")
 
-        self.app3EntryMask = CTkEntry(self.app3InputFrame, width=200, validate="key", validatecommand=(vcmd, '%S'))
-        self.app3EntryMask.bind("<Button-1>", self.checkEntries)
-
-        # Choix du paramètre de création des SR (Hotes ou nb de Sr)
-        self.btnSr = CTkButton(self.app3InputFrame, text="Par SR", cursor="hand2", width=100, command=lambda : self.setBySr_event(False),
-                               corner_radius=0, fg_color=BUTTON_FG_COLOR)
-        self.btnSr.place(y=170, x=INPUTFRAME_CENTER, anchor="e")
-        self.btnHotes = CTkButton(self.app3InputFrame, text="Par hôtes", cursor="hand2", width=100, command=lambda : self.setBySr_event(True),
-                                  corner_radius=0, fg_color=BUTTON_FG_COLOR)
-        self.btnHotes.place(y=170, x=INPUTFRAME_CENTER, anchor="w")
-
+        self.app3dataMask = StringVar()
+        self.app3dataMask.set("")
+        self.app3EntryMask = CTkEntry(self.app3InputFrame, width=200, validate="key", validatecommand=(vcmd, '%S'), textvariable=self.app3dataMask)
+        self.app3EntryMask.bind("<Key>", self.checkEntries)
 
         self.hasCustomMask = StringVar()
         self.hasCustomMask.set("off")
@@ -626,7 +626,7 @@ class Application3(CTkFrame):
                 self.labMask.place(y=310, x=INPUTFRAME_CENTER, anchor="center")
                 self.app3EntryMask.place(y=340, x=INPUTFRAME_CENTER, anchor="center")
             else:
-                self.app3EntryMask.delete(0, END)
+                self.app3dataMask.set("")
                 self.labMask.place_forget()
                 self.app3EntryMask.place_forget()
 
@@ -639,12 +639,20 @@ class Application3(CTkFrame):
 
         self.app3strErr = StringVar()
         self.app3strErr.set("")
-        
         labErr = CTkLabel(self.app3InputFrame, textvariable=self.app3strErr, text_color="red")
         labErr.place(y=FRAME_SIZE_Y - PAD_Y - 10, x=INPUTFRAME_CENTER, anchor="center")
 
         # Frame d'output
+        # labSr_Hotes = CTkLabel(self.app3InputFrame, text="Paramètre de création des SR")
+        # labSr_Hotes.place(y=140, x=INPUTFRAME_CENTER, anchor="center")
 
+        # Choix du paramètre de création des SR (Hotes ou nb de Sr)
+        # self.btnSr = CTkButton(self.app3InputFrame, text="Par SR", cursor="hand2", width=100, command=lambda : self.setBySr_event(False),
+                            #    corner_radius=0, fg_color=BUTTON_FG_COLOR)
+        # self.btnSr.place(y=170, x=INPUTFRAME_CENTER, anchor="e")
+        # self.btnHotes = CTkButton(self.app3InputFrame, text="Par hôtes", cursor="hand2", width=100, command=lambda : self.setBySr_event(True),
+                                #   corner_radius=0, fg_color=BUTTON_FG_COLOR)
+        # self.btnHotes.place(y=170, x=INPUTFRAME_CENTER, anchor="w")
 
 
         #Placement des frames
@@ -653,110 +661,43 @@ class Application3(CTkFrame):
 
         # Temporary
         self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
-        self.setBySr_event(True)
 
     def checkEntries(self, event):
         if (self.hasCustomMask.get() == "off"):
-            self.app3EntryMask.delete(0, END)
+            self.app3dataMask.set("")
         
-        if (self.app3EntryRes.get() == "" and self.app3EntryHotes.get() == "" and self.app3EntrySr.get() == ""):
+        if (self.app3dataRes.get() == "" or self.app3dataHotes.get() == "" or self.app3dataSr.get() == "" or (self.hasCustomMask.get() == "on" and self.app3dataMask.get() == "")):
             self.app3BtnCheck.configure(state=DISABLED, cursor="tcross")
-            self.app3strErr.set("(*) Champ requis : Adresse de réseau,\nNombre d'hôtes, Nombre de sous-réseaux")
-        elif (self.app3EntryRes.get() == "" and self.app3EntryHotes.get() == ""):
-            self.app3BtnCheck.configure(state=DISABLED, cursor="tcross")
-            self.app3strErr.set("(*) Champ requis : Adresse de réseau,\nNombre d'hôtes")
-        elif (self.app3EntryRes.get() == "" and self.app3EntrySr.get() == ""):
-            self.app3BtnCheck.configure(state=DISABLED, cursor="tcross")
-            self.app3strErr.set("(*) Champ requis : Adresse de réseau,\nNombre de sous-réseaux")
-        elif (self.app3EntryHotes.get() == "" and self.app3EntrySr.get() == ""):
-            self.app3BtnCheck.configure(state=DISABLED, cursor="tcross")
-            self.app3strErr.set("(*) Champ requis : Nombre d'hôtes,\nNombre de sous-réseaux")
-        elif (self.app3EntryRes.get() == ""):
-            self.app3BtnCheck.configure(state=DISABLED, cursor="tcross")
-            self.app3strErr.set("(*) Champ requis : Adresse de réseau")
-        elif (self.app3EntryHotes.get() == ""):
-            self.app3BtnCheck.configure(state=DISABLED, cursor="tcross")
-            self.app3strErr.set("(*) Champ requis : Nombre d'hôtes")
-        elif (self.app3EntrySr.get() == ""):
-            self.app3BtnCheck.configure(state=DISABLED, cursor="tcross")
-            self.app3strErr.set("(*) Champ requis : Nombre de sous-réseaux")
-        elif (self.hasCustomMask.get() == "on" and self.app3EntryMask.get() == ""):
-            self.app3BtnCheck.configure(state=DISABLED, cursor="tcross")
-            self.app3strErr.set("(*) Champ requis : Masque de réseau")
+            self.app3strErr.set("(*) Tous les champs sont requis.")
         else:
             self.app3BtnCheck.configure(state=NORMAL, cursor="hand2")
             self.app3strErr.set("")
 
-    def setBySr_event(self, val: bool):
-        if (val):
-            self.labHotes.place(y=210, x=INPUTFRAME_CENTER, anchor="center")
-            self.app3EntryHotes.place(y=240, x=INPUTFRAME_CENTER, anchor="center")
-            self.labSr.place_forget()
-            self.app3EntrySr.place_forget()
-            self.btnSr.configure(state=NORMAL, cursor="hand2", fg_color=BUTTON_FG_COLOR)
-            self.btnHotes.configure(state=DISABLED, cursor="tcross", fg_color=BUTTON_SELECTED_COLOR)
-        else:
-            self.labHotes.place_forget()
-            self.app3EntryHotes.place_forget()
-            self.labSr.place(y=210, x=INPUTFRAME_CENTER, anchor="center")
-            self.app3EntrySr.place(y=240, x=INPUTFRAME_CENTER, anchor="center")
-            self.btnHotes.configure(state=NORMAL, cursor="hand2", fg_color=BUTTON_FG_COLOR)
-            self.btnSr.configure(state=DISABLED, cursor="tcross", fg_color=BUTTON_SELECTED_COLOR)
-
-
-
-
-
-    # Frame - Réponses
-    # self.repFrame = CTkFrame(self,width=SIZE_X-360, height=300)
-    # self.repFrame.grid_propagate(0)
-
-    # Labels - Titre
-    # self.rep = StringVar()
-    # self.rep.set("OUI")
-    # lblVerif = Label(self.repFrame, textvariable=self.rep, justify="center", fg="red")
-    # lblVerif.place(x=0, y=0)
-
-
+    
     def createSR(self) -> None :
         """
         Récupere Réseau et Données de SR entrés. Crée les sous-réseaux si possible.
         """
 
-        self.attStr.set("")
-        self.repFrame.place(x=330, y=150)
-        self.repFrame.place_forget()
-        if hasattr(self, 'tableFrame'):
-            self.tableFrame.place_forget()
+        self.app3strErr.set("")
+        self.app3OutputFrame.place_forget()
 
-        #en fonction du nombre de champs requis, on redimensionne la frame
-        if (self.textReseau.get() == "" and self.textSR.get() == "" and self.textHotes.get() == ""):
-            self.infoFrame.configure(height=300)
-        elif (self.textReseau.get() == "" and self.textSR.get() == ""):
-            self.infoFrame.configure(height=290)
-        elif (self.textReseau.get() == "" and self.textHotes.get() == ""):
-            self.infoFrame.configure(height=290)
-        elif (self.textSR.get() == "" and self.textHotes.get() == ""):
-            self.infoFrame.configure(height=290)
-        elif (self.textReseau.get() == "" or self.textSR.get() == "" or self.textHotes.get() == ""):
-            self.infoFrame.configure(height=270)
-        else:
-            self.infoFrame.configure(height=250)
-
-        if (self.textReseau.get() == "" or self.textSR.get() == "" or self.textHotes.get() == ""):
-            self.attStr.set("(*) Champs requis : \n" + ("Adresse de réseau" if self.textReseau.get() == "" else "") + ("\n" if self.textReseau.get() == "" and self.textSR.get() == "" else "") + ("Nombre de SR souhaités" if self.textSR.get() == "" else "") + ("\n" if self.textSR.get() == "" and self.textHotes.get() == "" else "") + ("Nombre d'Hôtes par SR" if self.textHotes.get() == "" else ""))
+        # Un des champs est vide
+        if (self.app3dataRes.get() == "" or self.app3dataHotes.get() == "" or self.app3dataSr.get() == "" or (self.hasCustomMask.get() == "on" and self.app3dataMask.get() == "")):
+            self.app3strErr.set("(*) Tous les champs sont requis.")
             return
         
         # Instance de Reseau
-        res = Reseau("0.0.0.0", self.textMasque.get(), self.textReseau.get())
+        res = Reseau("0.0.0.0", self.app3dataMask.get() if self.hasCustomMask.get() == "on" else "", self.app3dataRes.get(), False, int(self.app3dataSr.get()), int(self.app3dataHotes.get()))
 
         # Vérification des champs
-        if (res.masque == "0.0.0.0" and self.textMasque.get() != ""):
-            self.attStr.set("Masque Réseau non-valide")
-        elif (res.adrReseau == "0.0.0.0"):
-            self.attStr.set("Adresse Réseau non-valide")
+        if (res.netMask == DEFAULT_NET_IP and self.app3dataMask.get() != ""):
+            self.app3strErr.set("Masque Réseau non-valide")
+        elif (res.netAddress == DEFAULT_NET_IP):
+            self.app3strErr.set("Adresse Réseau non-valide")
         else:
-            print(res.adrReseau + " - "  + res.masque)
+            print(res.subnets)
+
             # find the number of hosts possible with the given network and mask
             nbHotes = nbHotes = res.maxNetHosts
 
@@ -825,10 +766,10 @@ class Application3(CTkFrame):
         self.app3BtnCheck.configure(state=DISABLED, cursor="tcross")
         self.hasCustomMask.set("off")
 
-        self.app3EntryMask.delete(0, END)
-        self.app3EntryRes.delete(0, END)
-        self.app3EntryHotes.delete(0, END)
-        self.app3EntrySr.delete(0, END)
+        self.app3dataRes.set("")
+        self.app3dataRes.set("")
+        self.app3dataHotes.set("")
+        self.app3dataSr.set("")
 
         self.labMask.place_forget()
         self.app3EntryMask.place_forget()
