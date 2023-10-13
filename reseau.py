@@ -12,7 +12,7 @@ class Reseau():
     - Adresse du Sous Réseau
     """
 
-    def __init__(self, ip: str, netMask: str, netAddress: str = DEFAULT_NET_IP, isSubnetFromHosts: bool = False, wantedSubnets: int = 0, wantedHosts: int = 0) -> None:
+    def __init__(self, ip: str, netMask: str, netAddress: str = DEFAULT_NET_IP, isSubnetFromHosts: bool = False, wantedSubnets: int = 5565, wantedHosts: int = 33) -> None:
         self.ip: str = Reseau.defineIp(self, ip)
         self.netMask: str = Reseau.defineMask(self, netMask)
         self.netAddress: str = Reseau.defineAddress(self, netAddress)
@@ -22,23 +22,36 @@ class Reseau():
         self.subnets = Reseau.defineSubnets(self, wantedSubnets, wantedHosts, isSubnetFromHosts)
 
 
-        self.str()
+        self.str(wantedSubnets,wantedHosts,isSubnetFromHosts)
 
+
+        #  POUR LA VALEUR DU RETURN SAVOIR QUEL COMMANDE UTILISER POUR AFFICHAGE
+
+            
+        # Dans une boucle for listant les subnet, tu peux retrouver les ip/masque pour l'affichage
+        # for i, sub in enumerate(self.subnets):
+
+            # Pour obtenir l'ip (exemple : 192.168.33.0) -> sub.network_address
+            # Pour obtenir le / après (exemple /26) -> sub.prefixlen
 
     
-    def str(self) -> None:
-        print(self.subnets is None)
+    def str(self,wantedSubnets,wantedHosts,isSubnetFromHosts) -> None:
         print(
             "Reseau : \n\tIp : " + self.ip 
                + "\n\tMasque : " +  self.netMask 
                + "\n\tRéseau : " +  self.netAddress 
                + "\n\tBroadcast : " +  self.netBroadcast
                + "\n\tHotes max : " +  str(self.maxNetHosts)
-               + "\n\tSR voulus : " +  self.subnets
-            #    + "\n\tHotes voulus par SR : " +  str(self.wantedHosts)
-            #    + "\n\tDefinition des SR par le nombre d'hotes : " +  str(self.isSubnetFromHosts)
-              
+               + "\n\tSR voulus : " +  str(wantedSubnets)
+               + "\n\tHotes voulus par SR : " +  str(wantedHosts)
+               + "\n\tDefinition des SR par le nombre d'hotes : " +  str(isSubnetFromHosts)
               )
+        if(self.netAddress!="-1"):
+            for i, sub in enumerate(self.subnets):
+                print(f"Sous-réseau {i+1} : | Adresse : {sub.network_address}/{sub.prefixlen} | 1erIP : {sub.network_address+1} | \
+                    DernIP : {sub.network_address+self.maxNetHosts} | Broadcast : {sub.network_address+self.maxNetHosts+1}")
+
+
 
     @staticmethod
     def defineIp(self, ip: str) -> str:
@@ -92,7 +105,6 @@ class Reseau():
 
         # Vérification du nombre d'octets
         if len(octets) != 4:
-            print(1)
             return False
         
         # Initialisation d'un booleen pour verifier si on a des 1 contigus // Définition de l'octet précédent
@@ -165,30 +177,72 @@ class Reseau():
             return f'{net.broadcast_address:s}'
         else:
             return DEFAULT_NET_IP
-        
+
+
     @staticmethod
-    def defineSubnets(self, nbHosts, nbSubnets, fromHosts):
+    def defineSubnets(self, nbSubnets, nbHosts, fromHosts) -> list[ipaddress.IPv4Network]:
         if (self.netAddress != DEFAULT_NET_IP and self.netAddress != "-1" and self.netMask != DEFAULT_NET_IP):
-            net = ipaddress.IPv4Network(self.netAddress + '/' + self.netMask, False)
-            self.maxNetHosts = net.num_addresses - 2
+            
+            # Renvoye un network tel que -> 192.168.33.21/24
+            network = ipaddress.IPv4Network(self.netAddress + '/' + self.netMask, strict=False)
+            # Calcul taille masque max -> /..
+            subnet_mask_length = network.prefixlen + nbSubnets.bit_length() - 1
 
-            minHostPerSubnet = 2
+            # Si au dessus de 32 on se base que sur le nbr d'hôte et nn de sous-réseau
+            if subnet_mask_length > 32:
 
-            while (True):
-                if (nbHosts + 2 <= minHostPerSubnet):
-                    break
-                else :
-                    minHostPerSubnet *= 2
+                # Calcul du subnet par rapport au nbr d'hôte
+                subnet = network.subnets(new_prefix=network.prefixlen)
+                subnets_list = list(subnet)
+                self.maxNetHosts = subnets_list[0].num_addresses-2
 
+                # Impossible de mettre le nbr d'hôte dans la découpe
+                if self.maxNetHosts<nbHosts:
+                    return list()
 
-            #Check if we can generate subnets with the given number of hosts and subnets
-            if (self.maxNetHosts > minHostPerSubnet * nbSubnets):
-                # Ici gen les subnets avec le nombre d'hotes et de sr 
-                pass
+                # Possible de mettre le nbr d'hôte dans la découpe
+                else:
+                    print("aaaaaaaaaaaaaaaaaaaaa")
+                    # Découpe seulement en hote
+                    subnet_mask_addition=128
+                    subnet_mask=0
+                    while subnet_mask_addition-2>=nbHosts:
+                        subnet_mask+=1
+                        subnet_mask_addition/=2
 
+                    # Pas touche :D les info sont envoyer dans les variables voulues et return la liste
+                    subnet = network.subnets(new_prefix=network.prefixlen+subnet_mask)
+                    subnets_list = list(subnet)
+                    self.maxNetHosts = subnets_list[0].num_addresses-2
+
+                    return subnets_list
+                      
             else:
-                #ici mettre en fonction de fromHosts (boolean) une gen en fonction du nb de subnet ou de hossts
-                pass
-        else:
-            return []
+
+                subnet = network.subnets(new_prefix=subnet_mask_length)
+                subnets_list = list(subnet)
+                self.maxNetHosts =subnets_list[0].num_addresses-2
+
+                if self.maxNetHosts<nbHosts:
+                    # seulement en SR
+                    return subnets_list
+
+                else:
+                    if(fromHosts):
+                        # Découpe seulement en hote
+                        subnet_mask_addition=128
+                        subnet_mask=1
+                        while subnet_mask_addition-2>nbHosts:
+                            subnet_mask+=1
+                            subnet_mask_addition/=2
+                        subnet_mask-=1
+
+                        # Pas touche :D les info sont envoyer dans les variables voulues et return la liste
+                        subnet = network.subnets(new_prefix=network.prefixlen+subnet_mask)
+                        subnets_list = list(subnet)
+                        self.maxNetHosts = subnets_list[0].num_addresses-2
+
+                        return subnets_list
+                    return subnets_list
+
 

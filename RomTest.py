@@ -25,6 +25,6 @@ else:
     # Afficher les informations sur les sous-réseaux créés
     print(f"Adresse IP d'origine : {network.network_address}/{network.prefixlen}")
     print(f"Masque de sous-réseau pour {num_subnets} sous-réseaux : /{subnet_mask_length}")
-    
+
     for i, sub in enumerate(subnets_list):
         print(f"Sous-réseau {i+1} : {sub.network_address}/{subnet_mask_length}")

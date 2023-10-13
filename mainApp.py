@@ -503,7 +503,6 @@ class Application2(CTkFrame):
             return
         
         # Instance de Reseau
-        print(self.app2EntryIp.get())
         res = Reseau(self.app2EntryIp.get(), self.app2EntryMask.get() if self.hasCustomMask.get() == "on" else "", self.app2EntryRes.get())
 
         # Vérification des champs
@@ -688,19 +687,14 @@ class Application3(CTkFrame):
             return
         
         # Instance de Reseau
-        res = Reseau("0.0.0.0", self.app3dataMask.get() if self.hasCustomMask.get() == "on" else "", self.app3dataRes.get(), False, int(self.app3dataSr.get()), int(self.app3dataHotes.get()))
+        res = Reseau(self.app3dataRes.get(), self.app3EntryMask.get() if self.hasCustomMask.get() == "on" else "", self.app3dataRes.get(), True, int(self.app3dataSr.get()), int(self.app3dataHotes.get()))
 
         # Vérification des champs
         if (res.netMask == DEFAULT_NET_IP and self.app3dataMask.get() != ""):
             self.app3strErr.set("Masque Réseau non-valide")
-        elif (res.netAddress == DEFAULT_NET_IP):
+        elif (res.netAddress == DEFAULT_NET_IP) or (res.netAddress == "-1"):
             self.app3strErr.set("Adresse Réseau non-valide")
         else:
-            print(res.subnets)
-
-            # find the number of hosts possible with the given network and mask
-            nbHotes = nbHotes = res.maxNetHosts
-
             # Déterminer s’il sera possible ou pas de réaliser une découpe 
             # classique sur base du nombre de SR. Si la réponse est oui, le 
             # programme devra fournir le plan d’adressage complet de la 
@@ -708,39 +702,41 @@ class Application3(CTkFrame):
             # peut avoir au maximum dans cette découpe
 
             # Calculer le masque de sous-réseau approprié pour le nombre de sous-réseaux
-            subnet_mask_length = net.prefixlen + int(self.textSR.get()).bit_length() - 1
-            if subnet_mask_length > 32:
-                print("Nombre de sous-réseaux souhaité trop élevé pour l'adresse IP donnée.")
-            else:
-                subnet = net.subnets(new_prefix=subnet_mask_length)
-                subnets_list = list(subnet)
+            # subnet_mask_length = net.prefixlen + int(self.textSR.get()).bit_length() - 1
+            # if subnet_mask_length > 32:
+            #     print("Nombre de sous-réseaux souhaité trop élevé pour l'adresse IP donnée.")
+            # else:
+            #     subnet = net.subnets(new_prefix=subnet_mask_length)
+            #     subnets_list = list(subnet)
 
-                # Afficher les informations sur les sous-réseaux créés
-                print(f"Adresse IP d'origine : {net.network_address}/{net.prefixlen}")
-                print(f"Masque de sous-réseau pour {int(self.textSR.get())} sous-réseaux : /{subnet_mask_length}")
+            #     # Afficher les informations sur les sous-réseaux créés
+            #     print(f"Adresse IP d'origine : {net.network_address}/{net.prefixlen}")
+            #     print(f"Masque de sous-réseau pour {int(self.textSR.get())} sous-réseaux : /{subnet_mask_length}")
 
-                for i, sub in enumerate(subnets_list):
-                    print(f"Sous-réseau {i+1} : {sub.network_address}/{subnet_mask_length}")
+            #     for i, sub in enumerate(subnets_list):
+            #         print(f"Sous-réseau {i+1} : {sub.network_address}/{subnet_mask_length}")
 
             #define a frame that will contian the table and scrollbar
             self.tableFrame = CTkFrame(self, width=600, height=150)
             self.tableFrame.grid_propagate(0)
 
             #define the table with tkinter
-            self.table = ttk.Treeview(self.tableFrame, column=('Sous-Réseau', 'Masque', 'Plage', 'Broadcast', 'Hôtes'), show="headings", height=6)
-            self.table.heading('#1', text='Sous-Réseau')
-            self.table.heading('#2', text='Masque')
-            self.table.heading('#3', text='Plage')
-            self.table.heading('#4', text='Broadcast')
-            self.table.heading('#5', text='Hôtes')
+            self.table = ttk.Treeview(self.tableFrame, column=('Numéro', 'Adresse Réseau', '1er IP', 'Dernière IP', 'Broadcast', 'Hôtes'), show="headings", height=6)
+            self.table.heading('#1', text='Numéro')
+            self.table.heading('#2', text='Adresse Réseau')
+            self.table.heading('#3', text='1er IP')
+            self.table.heading('#4', text='Dernière IP')
+            self.table.heading('#5', text='Broadcast')
+            self.table.heading('#6', text='Hôtes')
 
             self.table.column('#0', minwidth=0, width=0, stretch=False)
-            self.table.column('#1', stretch=False, minwidth=100, width=100, anchor=CENTER)
+            self.table.column('#1', stretch=False, minwidth=75, width=75, anchor=CENTER)
             self.table.column('#2', stretch=False, minwidth=100, width=100, anchor=CENTER)
-            self.table.column('#3', stretch=False, minwidth=200, width=200, anchor=CENTER)
+            self.table.column('#3', stretch=False, minwidth=100, width=100, anchor=CENTER)
             self.table.column('#4', stretch=False, minwidth=100, width=100, anchor=CENTER)
             self.table.column('#5', stretch=False, minwidth=100, width=100, anchor=CENTER)
-            
+            self.table.column('#6', stretch=False, minwidth=50, width=50, anchor=CENTER)
+
             self.table.grid(row=0, column=0)
             
             scrollbar = Scrollbar(self.tableFrame, orient=VERTICAL, command=self.table.yview)
@@ -756,9 +752,20 @@ class Application3(CTkFrame):
 
             #add data to the table
 
-            for i in range(0, 25):
-                self.table.insert(parent='', index='end', iid=i, text= f'{i+1}', values=(f'SR {i+1}', '255.255.255.255', '255.255.255.255 / 255.255.255.255', '255.255.255.255', '100000000'))
-            
+            for i, sub in enumerate(res.subnets):
+                self.table.insert(parent='', index='end', iid=i, text= f'{i+1}', values=(
+                # Numéro
+                f'SR {i+1}', 
+                # Adresse Réseau
+                f'{sub.network_address}/{sub.prefixlen}',
+                # 1er IP
+                f'{sub.network_address+1}',
+                # Dernière IP
+                f'{sub.network_address+res.maxNetHosts}',
+                # Broadcast
+                f'{sub.network_address+res.maxNetHosts+1}',
+                # Hôtes
+                f'{res.maxNetHosts}'))
 
 
     # Fonction de reset de la frame
