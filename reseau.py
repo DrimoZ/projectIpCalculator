@@ -15,6 +15,7 @@ class Reseau():
 
     def __init__(self, ip: str, netMask: str, netAddress: str = DEFAULT_NET_IP, isSubnetFromHosts: bool = False, wantedSubnets: int = 0, wantedHosts: int = 0) -> None:
         self.ip: str = Reseau.defineIp(self, ip)
+
         self.netMask: str = Reseau.defineMask(self, netMask, netAddress)
         self.netAddress: str = Reseau.defineAddress(self, netAddress)
         self.netBroadcast: str = Reseau.defineBroadcast(self)
@@ -83,6 +84,7 @@ class Reseau():
             ip_object = ipaddress.ip_address(ip) 
             ipV4 = ipaddress.IPv4Address(ip)
             return not (ipV4.is_reserved or ipV4.is_link_local or ipV4.is_multicast or ipV4.is_unspecified or ipV4.is_loopback)
+        
             # octets = ip.strip().lower().split('.')
             # if(int(octets[0])==127 or int(octets[0])==0):
                 # return False
@@ -94,6 +96,7 @@ class Reseau():
     def defineMask(self, mask: str, netAdress: str) -> str:
         # Si le masque n'est pas donné, on le défini en fonction de l'ip
         octetsIp = self.ip.strip().lower().split('.')
+
         if (self.ip == DEFAULT_NET_IP):
             if not hasattr(self, 'netAddress'):
                 self.netAddress = Reseau.defineAddress(self, netAdress)
@@ -171,7 +174,18 @@ class Reseau():
     def defineAddress(self, netAddress: str) -> str:
         if (self.ip == DEFAULT_NET_IP):
             if (Reseau.isValidAddress(netAddress)):
-                return netAddress
+                octets = netAddress.strip().lower().split('.')
+                if(int(octets[0])<127):
+                    for i in range(1,4):
+                        octets[i]="0"
+                    return ".".join(octets)
+                elif(int(octets[0])<192):
+                    for i in range(2,4):
+                        octets[i]="0"
+                    return ".".join(octets)
+                else:
+                    octets[3]="0"
+                    return ".".join(octets)
             else:
                 return DEFAULT_NET_IP
         else:   
@@ -193,14 +207,9 @@ class Reseau():
     
     @staticmethod
     def isValidAddress(netAddress: str) -> bool:
-        try:
-            ip_object = ipaddress.ip_address(netAddress) 
-            octets = netAddress.strip().lower().split('.')
-            if(int(octets[0])==127 or int(octets[0])==0):
-                return False
-            return True
-        except ValueError:
+        if (not Reseau.isValidIp(netAddress)):
             return False
+        return True
 
     @staticmethod
     def defineBroadcast(self) -> str:

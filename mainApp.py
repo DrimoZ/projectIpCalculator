@@ -41,6 +41,8 @@ def setDisconnected():
 # Check Inputs - Allow only Digits or "."
 def verifCaracter(P):
     if str.isdigit(P) or P == "" or P == ".":
+        if P == "²" or P == "³":
+            return False
         return True
     else:
         return False
@@ -644,18 +646,17 @@ class Application3(CTkFrame):
         # Frame d'output
         labOutTitre = CTkLabel(self.app3OutputFrame, text="Résultats", font = CTkFont("Times", 21, underline=True))
         labOutTitre.place(y=30, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
-
+        self.labOutResult = CTkLabel(self.app3OutputFrame, text="Impossible de créer un sous-réseau avec les données entrées.", text_color="red")
         # Frame de la table/buttons
-        self.app3frameSubnets = CTkFrame(self.app3OutputFrame, width=569, height=215)
-        self.app3frameSubnets.place(x=0, y=70)
+        self.app3frameSubnets = CTkFrame(self.app3OutputFrame, width=519, height=215)
+        # self.app3frameSubnets.place(x=25, y=70)
 
-        # Choix du paramètre de création des SR (Hotes ou nb de Sr)
-        self.app3btnPrefSr = CTkButton(self.app3frameSubnets, text="Prioriser la découpe par nombre de SR", cursor="hand2", width=TITLE_OUTPUT_SIZE_X/2, height=30,
+        # Choix du paramètre de création des SR (Hotes ou nb de Sr) si besoin
+        self.app3btnPrefSr = CTkButton(self.app3frameSubnets, text="Prioriser la découpe par nombre de SR", cursor="hand2", width=(TITLE_OUTPUT_SIZE_X - 50)/2, height=30,
                                 corner_radius=0, fg_color=BUTTON_FG_COLOR)
-        self.app3btnPrefSr.place(y=0, x=0)
-        self.app3btnPrefHotes = CTkButton(self.app3frameSubnets, text="Prioriser la découpe par nombre d'hôtes par SR", cursor="hand2", width=TITLE_OUTPUT_SIZE_X/2, height=30,
+        
+        self.app3btnPrefHotes = CTkButton(self.app3frameSubnets, text="Prioriser la découpe par nombre d'hôtes par SR", cursor="hand2", width=(TITLE_OUTPUT_SIZE_X - 50)/2, height=30,
                                 corner_radius=0, fg_color=BUTTON_FG_COLOR)
-        self.app3btnPrefHotes.place(y=0, x=TITLE_OUTPUT_SIZE_X/2)
         
         
 
@@ -714,7 +715,7 @@ class Application3(CTkFrame):
             self.table.column('#2', stretch=False, minwidth=100, width=100, anchor=CENTER)
             self.table.column('#3', stretch=False, minwidth=100, width=100, anchor=CENTER)
             self.table.column('#4', stretch=False, minwidth=170, width=170, anchor=CENTER)
-            self.table.column('#5', stretch=False, minwidth=100, width=100, anchor=CENTER)
+            self.table.column('#5', stretch=False, minwidth=50, width=50, anchor=CENTER)
             self.table.column('#6', stretch=False, minwidth=49, width=49, anchor=CENTER)
 
             self.table.place(x=0, y=30)
@@ -726,7 +727,20 @@ class Application3(CTkFrame):
                 if self.table.identify_region(event.x, event.y) == "separator":
                     return "break"
             self.table.bind('<Button-1>', handle_click)
-            
+
+
+            # Vérification de la possibilité de découper le réseau en fonction des 2 parametres
+            if (res.subnets != []):
+                # Liste renvoyée par la fonction de découpage non-vide
+                
+                pass
+            elif (res.subnets == [] and not res.canCreateFromHosts and not res.canCreateFromSubnets): 
+                #Pas possible de creer un quelconque sous-réseau avec les données entrées
+                
+                labOutResult.place(y=OUTPUT_FRAME_SIZE_Y/2, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
+
+
+
             #add data to the table
             for i, sub in enumerate(res.subnets):
                 self.table.insert(parent='', index='end', iid=i, text= f'{i+1}', values=(
@@ -761,6 +775,7 @@ class Application3(CTkFrame):
         self.app3EntryMask.place_forget()
 
         self.app3OutputFrame.place_forget()
+        self.labOutResult.place_forget()
 
         self.app3strErr.set("")
 
