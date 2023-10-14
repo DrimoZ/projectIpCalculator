@@ -649,7 +649,10 @@ class Application3(CTkFrame):
         self.labOutResult = CTkLabel(self.app3OutputFrame, text="Impossible de créer un sous-réseau avec les données entrées.", text_color="red")
         # Frame de la table/buttons
         self.app3frameSubnets = CTkFrame(self.app3OutputFrame, width=519, height=215)
-        # self.app3frameSubnets.place(x=25, y=70)
+        self.app3strSubnets = StringVar()
+        self.app3strSubnets.set("")
+        labOutDecoupe = CTkLabel(self.app3frameSubnets, textvariable=self.app3strSubnets)
+        labOutDecoupe.place(y=10, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
 
         # Choix du paramètre de création des SR (Hotes ou nb de Sr) si besoin
         self.app3btnPrefSr = CTkButton(self.app3frameSubnets, text="Prioriser la découpe par nombre de SR", cursor="hand2", width=(TITLE_OUTPUT_SIZE_X - 50)/2, height=30,
@@ -659,13 +662,36 @@ class Application3(CTkFrame):
                                 corner_radius=0, fg_color=BUTTON_FG_COLOR)
         
         
+        #Treeview
+        self.app3tvSubnets = ttk.Treeview(self.app3frameSubnets, column=('N° SR', 'Adresse SR', 'Broadcast', 'Plage Ip', 'Pas', 'Hôtes'), show="headings", height=8)
+        self.app3tvSubnets.heading('#1', text='N° SR')
+        self.app3tvSubnets.heading('#2', text='Adresse SR')
+        self.app3tvSubnets.heading('#3', text='Broadcast')
+        self.app3tvSubnets.heading('#4', text='Plage IP')
+        self.app3tvSubnets.heading('#5', text='Pas')
+        self.app3tvSubnets.heading('#6', text='Hôtes')
 
+        self.app3tvSubnets.column('#0', minwidth=0, width=0, stretch=False)
+        self.app3tvSubnets.column('#1', stretch=False, minwidth=50, width=50, anchor=CENTER)
+        self.app3tvSubnets.column('#2', stretch=False, minwidth=100, width=100, anchor=CENTER)
+        self.app3tvSubnets.column('#3', stretch=False, minwidth=100, width=100, anchor=CENTER)
+        self.app3tvSubnets.column('#4', stretch=False, minwidth=170, width=170, anchor=CENTER)
+        self.app3tvSubnets.column('#5', stretch=False, minwidth=50, width=50, anchor=CENTER)
+        self.app3tvSubnets.column('#6', stretch=False, minwidth=49, width=49, anchor=CENTER)
+        
+        scrollbar = Scrollbar(self.app3frameSubnets, orient=VERTICAL, command=self.app3tvSubnets.yview)
+        self.app3tvSubnets.configure(yscroll=scrollbar.set)
+
+        def handle_click(event):
+            if self.app3tvSubnets.identify_region(event.x, event.y) == "separator":
+                return "break"
+        self.app3tvSubnets.bind('<Button-1>', handle_click)
+        
         #Placement des frames
         self.app3InputFrame.place(x = PAD_X, y = PAD_Y)
         app3TitleFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = PAD_Y)
 
-        # Temporary
-        self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+        
 
     def checkEntries(self, event):
         if (self.hasCustomMask.get() == "off"):
@@ -686,6 +712,11 @@ class Application3(CTkFrame):
 
         self.app3strErr.set("")
         self.app3OutputFrame.place_forget()
+        self.labOutResult.place_forget()
+        self.app3frameSubnets.place_forget()
+        self.app3btnPrefSr.place_forget()
+        self.app3btnPrefHotes.place_forget()
+        self.app3tvSubnets.place_forget()
 
         # Un des champs est vide
         if (self.app3dataRes.get() == "" or self.app3dataHotes.get() == "" or self.app3dataSr.get() == "" or (self.hasCustomMask.get() == "on" and self.app3dataMask.get() == "")):
@@ -702,64 +733,53 @@ class Application3(CTkFrame):
         elif (res.netAddress == DEFAULT_NET_IP) or (res.netAddress == "-1"):
             self.app3strErr.set("Adresse Réseau non-valide ou réservée")
         else:
-            self.table = ttk.Treeview(self.app3frameSubnets, column=('N° SR', 'Adresse SR', 'Broadcast', 'Plage Ip', 'Pas', 'Hôtes'), show="headings", height=8)
-            self.table.heading('#1', text='N° SR')
-            self.table.heading('#2', text='Adresse SR')
-            self.table.heading('#3', text='Broadcast')
-            self.table.heading('#4', text='Plage IP')
-            self.table.heading('#5', text='Pas')
-            self.table.heading('#6', text='Hôtes')
-
-            self.table.column('#0', minwidth=0, width=0, stretch=False)
-            self.table.column('#1', stretch=False, minwidth=50, width=50, anchor=CENTER)
-            self.table.column('#2', stretch=False, minwidth=100, width=100, anchor=CENTER)
-            self.table.column('#3', stretch=False, minwidth=100, width=100, anchor=CENTER)
-            self.table.column('#4', stretch=False, minwidth=170, width=170, anchor=CENTER)
-            self.table.column('#5', stretch=False, minwidth=50, width=50, anchor=CENTER)
-            self.table.column('#6', stretch=False, minwidth=49, width=49, anchor=CENTER)
-
-            self.table.place(x=0, y=30)
-            
-            scrollbar = Scrollbar(self.app3frameSubnets, orient=VERTICAL, command=self.table.yview)
-            self.table.configure(yscroll=scrollbar.set)
-
-            def handle_click(event):
-                if self.table.identify_region(event.x, event.y) == "separator":
-                    return "break"
-            self.table.bind('<Button-1>', handle_click)
-
-
             # Vérification de la possibilité de découper le réseau en fonction des 2 parametres
             if (res.subnets != []):
                 # Liste renvoyée par la fonction de découpage non-vide
-                
-                pass
-            elif (res.subnets == [] and not res.canCreateFromHosts and not res.canCreateFromSubnets): 
+                self.appendTable(res)
+                self.app3tvSubnets.place(x=0, y=0)
+                self.app3frameSubnets.place(x=25, y=70)
+                self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+            elif (not res.canCreateFromHosts and not res.canCreateFromSubnets): 
                 #Pas possible de creer un quelconque sous-réseau avec les données entrées
-                
-                labOutResult.place(y=OUTPUT_FRAME_SIZE_Y/2, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
+                self.labOutResult.place(y=OUTPUT_FRAME_SIZE_Y/2, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
+                self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+            elif (res.canCreateFromHosts and res.canCreateFromSubnets):
+                #Possible de creer un subnets avec les deux values mais SEPEREMENT
+                self.app3frameSubnets.place(x=25, y=70)
+                self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+            elif (res.canCreateFromHosts):
+                self.app3frameSubnets.place(x=25, y=70)
+                self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+            elif (res.canCreateFromSubnets):
+                self.app3frameSubnets.place(x=25, y=70)
+                self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
 
 
 
-            #add data to the table
-            for i, sub in enumerate(res.subnets):
-                self.table.insert(parent='', index='end', iid=i, text= f'{i+1}', values=(
-                # Numéro
-                f'{i+1}', 
-                # Adresse sr
-                f'{sub.network_address}/{sub.prefixlen}',
-                # Broadcast
-                f'{sub.network_address+res.maxNetHosts+1}',
-                # Plage
-                f'{sub.network_address+1} - {sub.network_address+res.maxNetHosts}',
-                # Pas
-                f'{res.maxNetHosts+2}',
-                # Hôtes
-                f'{res.maxNetHosts}'))
             
-            self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+            
+            
 
-    
+    def appendTable(self, res: Reseau):
+        self.app3tvSubnets.delete(*self.app3tvSubnets.get_children())
+
+        for i, sub in enumerate(res.subnets):
+            self.app3tvSubnets.insert(parent='', index='end', iid=i, text= f'{i+1}', values=(
+            # Numéro
+            f'{i+1}', 
+            # Adresse sr
+            f'{sub.network_address}/{sub.prefixlen}',
+            # Broadcast
+            f'{sub.network_address+res.maxNetHosts+1}',
+            # Plage
+            f'{sub.network_address+1} - {sub.network_address+res.maxNetHosts}',
+            # Pas
+            f'{res.maxNetHosts+2}',
+            # Hôtes
+            f'{res.maxNetHosts}'))
+        
+
     
     # Fonction de reset de la frame
     def reset(self) -> None:
@@ -776,6 +796,10 @@ class Application3(CTkFrame):
 
         self.app3OutputFrame.place_forget()
         self.labOutResult.place_forget()
+        self.app3frameSubnets.place_forget()
+        self.app3btnPrefSr.place_forget()
+        self.app3btnPrefHotes.place_forget()
+        self.app3tvSubnets.place_forget()
 
         self.app3strErr.set("")
 
