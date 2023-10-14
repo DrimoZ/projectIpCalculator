@@ -13,7 +13,7 @@ class Reseau():
     - Adresse du Sous Réseau
     """
 
-    def __init__(self, ip: str, netMask: str, netAddress: str = DEFAULT_NET_IP, isSubnetFromHosts: bool = False, wantedSubnets: int = 0, wantedHosts: int = 0) -> None:
+    def __init__(self, ip: str, netMask: str, netAddress: str = DEFAULT_NET_IP, wantedSubnets: int = 0, wantedHosts: int = 0, subnetGenType: int = -1) -> None:
         self.ip: str = Reseau.defineIp(self, ip)
 
         self.netMask: str = Reseau.defineMask(self, netMask, netAddress)
@@ -25,10 +25,10 @@ class Reseau():
         
         self.createdSubnet: int = -1
         self.maxNetHosts: int = 0
-        self.subnets = Reseau.defineSubnets(self, wantedSubnets, wantedHosts, isSubnetFromHosts)
+        self.subnets = Reseau.defineSubnets(self, wantedSubnets, wantedHosts)
 
 
-        self.str(wantedSubnets,wantedHosts,isSubnetFromHosts)
+        self.str(wantedSubnets,wantedHosts,subnetGenType)
         
 
         # Tous les deux faisables: retourner une liste de sous-réseau
@@ -40,7 +40,7 @@ class Reseau():
         #   => 2 -> gen que en fonction du nombre d'hôtes
 
     
-    def str(self,wantedSubnets,wantedHosts,isSubnetFromHosts) -> None:
+    def str(self,wantedSubnets,wantedHosts,subnetGenType) -> None:
         print(
             "Reseau : \n\tIp : " + self.ip 
                + "\n\tMasque : " +  self.netMask 
@@ -49,7 +49,7 @@ class Reseau():
                + "\n\tHotes max : " +  str(self.maxNetHosts)
                + "\n\tSR voulus : " +  str(wantedSubnets)
                + "\n\tHotes voulus par SR : " +  str(wantedHosts)
-               + "\n\tDefinition des SR par le nombre d'hotes : " +  str(isSubnetFromHosts)
+               + "\n\tType de sous-réseaux : " +  str(subnetGenType)
                + "\n\tType de découpe : " +  str(self.createdSubnet)
               )
         if(self.netAddress!="-1"):
@@ -208,9 +208,20 @@ class Reseau():
             return DEFAULT_NET_IP
 
     @staticmethod
-    def defineSubnets(self, nbSubnets, nbHosts, fromHosts, gen: int = 0) -> list[ipaddress.IPv4Network]:
+    def defineSubnets(self, nbSubnets, nbHosts, gen: int = 0) -> list[ipaddress.IPv4Network]:
         if (self.netAddress != DEFAULT_NET_IP and self.netAddress != "-1" and self.netMask != DEFAULT_NET_IP and nbHosts != 0 and nbSubnets != 0):
-            
+            if (gen == 0):
+                # INIT de la classe -> renvoie uniquemenet une liste si les 2 sont faisables ensembles
+                # si 2 possibles separement -> list = empty + canCreateFromHosts & canCreateFromSubnets a True
+                # si 1 seul possible -> set canCreateFromHosts ou canCreateFromSubnets a True (en fonction de celui possible) + list de le celui possible
+                pass
+            elif (gen == 1):
+                # Appel manuel -> list en fonction des sr
+                pass
+            elif (gen == 2):
+                # Appel manuel -> list en fonction des hôtes
+                pass
+
             network = ipaddress.IPv4Network(self.netAddress + '/' + self.netMask, strict=False)
             subnet_mask_length = network.prefixlen + nbSubnets.bit_length() - 1
             # Si au dessus de 32 on se base que sur le nbr d'hôte et nn de sous-réseau
