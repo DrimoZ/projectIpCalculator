@@ -751,10 +751,10 @@ class Application3(CTkFrame):
         elif (res.netAddress == DEFAULT_NET_IP) or (res.netAddress == "-1"):
             self.app3strErr.set("Adresse Réseau non-valide ou réservée")
         else:
-            res.subnets = []
-            res.canCreateFromHosts = True
-            res.canCreateFromSubnets = True
-
+            # res.subnets = []
+            # res.canCreateFromHosts = True
+            # res.canCreateFromSubnets = True
+            print(res.subnets)
             # Vérification de la possibilité de découper le réseau en fonction des 2 parametres
             if (res.subnets != [] and res.canCreateFromHosts and res.canCreateFromSubnets):
                 # Liste renvoyée par la fonction de découpage non-vide
