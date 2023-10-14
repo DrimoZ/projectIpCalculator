@@ -22,7 +22,7 @@ class Reseau():
 
         self.canCreateFromSubnets: bool = False
         self.canCreateFromHosts: bool = False
-
+        
         self.createdSubnet: int = -1
         self.maxNetHosts: int = 0
         self.subnets = Reseau.defineSubnets(self, wantedSubnets, wantedHosts, isSubnetFromHosts)
@@ -38,18 +38,6 @@ class Reseau():
         #   => 0 -> gen que si les 2 sont faisables + modif params
         #   => 1 -> gen que en fonction du nombre de sous-réseau
         #   => 2 -> gen que en fonction du nombre d'hôtes
-
-
-
-
-        #  POUR LA VALEUR DU RETURN SAVOIR QUEL COMMANDE UTILISER POUR AFFICHAGE
-
-            
-        # Dans une boucle for listant les subnet, tu peux retrouver les ip/masque pour l'affichage
-        # for i, sub in enumerate(self.subnets):
-
-            # Pour obtenir l'ip (exemple : 192.168.33.0) -> sub.network_address
-            # Pour obtenir le / après (exemple /26) -> sub.prefixlen
 
     
     def str(self,wantedSubnets,wantedHosts,isSubnetFromHosts) -> None:
@@ -223,9 +211,7 @@ class Reseau():
     def defineSubnets(self, nbSubnets, nbHosts, fromHosts, gen: int = 0) -> list[ipaddress.IPv4Network]:
         if (self.netAddress != DEFAULT_NET_IP and self.netAddress != "-1" and self.netMask != DEFAULT_NET_IP and nbHosts != 0 and nbSubnets != 0):
             
-            # Renvoye un network tel que -> 192.168.33.21/24
             network = ipaddress.IPv4Network(self.netAddress + '/' + self.netMask, strict=False)
-            # Calcul taille masque max -> /..
             subnet_mask_length = network.prefixlen + nbSubnets.bit_length() - 1
 
             # Si au dessus de 32 on se base que sur le nbr d'hôte et nn de sous-réseau
@@ -243,19 +229,9 @@ class Reseau():
                 # Possible de mettre le nbr d'hôte dans la découpe
                 else:
                     # Découpe seulement en hote
-                    subnet_mask_addition=128
-                    subnet_mask=0
-                    while subnet_mask_addition-2>=nbHosts:
-                        subnet_mask+=1
-                        subnet_mask_addition/=2
-
-                    # Pas touche :D les info sont envoyer dans les variables voulues et return la liste
-                    subnet = network.subnets(new_prefix=network.prefixlen+subnet_mask)
-                    subnets_list = list(subnet)
-                    self.maxNetHosts = subnets_list[0].num_addresses-2
-
-                    self.createdSubnet = 2 # SR IMPOSSIBLE -> HOSTS
-                    return subnets_list
+                    self.createdSubnet = 2
+                    self.canCreateFromHosts: bool = True
+                    return Reseau.Host(self,nbHosts,network)    
                       
             else:
 
@@ -265,29 +241,39 @@ class Reseau():
 
                 if self.maxNetHosts<nbHosts:
                     # seulement en SR
+                    self.canCreateFromHosts: bool = True
                     self.createdSubnet = 1 # HOSTS IMPOSSIBLE -> SR
                     return subnets_list
 
                 else:
-                    if(fromHosts):
-                        # Découpe seulement en hote
-                        subnet_mask_addition=128
-                        subnet_mask=1
-                        while subnet_mask_addition-2>nbHosts:
-                            subnet_mask+=1
-                            subnet_mask_addition/=2
-                        subnet_mask-=1
-
-                        # Pas touche :D les info sont envoyer dans les variables voulues et return la liste
-                        subnet = network.subnets(new_prefix=network.prefixlen+subnet_mask)
-                        subnets_list = list(subnet)
-                        self.maxNetHosts = subnets_list[0].num_addresses-2
-
-                        self.createdSubnet = 2
-                        return subnets_list                    
+                    self.canCreateFromSubnets: bool = True
+                    self.canCreateFromHosts: bool = True                 
                     self.createdSubnet = 0
                     return subnets_list
         else:
             return list()
 
+        
+    def Host(self,nbHosts,network:ipaddress.IPv4Network) -> list[ipaddress.IPv4Network]:
+        # Découpe seulement en hote
+        match network.prefixlen:
+            case 8:
+                subnet_mask_addition=8388608
+            case 16:
+                subnet_mask_addition=32768
+            case 24:
+                subnet_mask_addition=128
+        
+        subnet_mask=1
+        while subnet_mask_addition-2>=nbHosts:
+            subnet_mask+=1
+            subnet_mask_addition/=2
+        subnet_mask-=1
 
+        # Pas touche :D les info sont envoyer dans les variables voulues et return la liste
+        subnet = network.subnets(new_prefix=network.prefixlen+subnet_mask)
+        subnets_list = list(subnet)
+        self.maxNetHosts = subnets_list[0].num_addresses-2
+
+        self.createdSubnet = 2
+        return subnets_list  
