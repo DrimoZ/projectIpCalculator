@@ -1,6 +1,7 @@
 from constants import DEFAULT_NET_IP
 import ipaddress
 
+
 # Classe Reseau - OOP
 class Reseau():
     """
@@ -23,6 +24,7 @@ class Reseau():
 
 
         self.str(wantedSubnets,wantedHosts,isSubnetFromHosts)
+        
 
 
         #  POUR LA VALEUR DU RETURN SAVOIR QUEL COMMANDE UTILISER POUR AFFICHAGE
@@ -202,7 +204,6 @@ class Reseau():
 
                 # Possible de mettre le nbr d'hôte dans la découpe
                 else:
-                    print("aaaaaaaaaaaaaaaaaaaaa")
                     # Découpe seulement en hote
                     subnet_mask_addition=128
                     subnet_mask=0
@@ -219,7 +220,7 @@ class Reseau():
                       
             else:
 
-                subnet = network.subnets(new_prefix=subnet_mask_length)
+                subnet = network.subnets(new_prefix=subnet_mask_length+1)
                 subnets_list = list(subnet)
                 self.maxNetHosts =subnets_list[0].num_addresses-2
 
@@ -244,5 +245,3 @@ class Reseau():
 
                         return subnets_list
                     return subnets_list
-
-
