@@ -13,18 +13,32 @@ class Reseau():
     - Adresse du Sous Réseau
     """
 
-    def __init__(self, ip: str, netMask: str, netAddress: str = DEFAULT_NET_IP, isSubnetFromHosts: bool = False, wantedSubnets: int = 5565, wantedHosts: int = 33) -> None:
+    def __init__(self, ip: str, netMask: str, netAddress: str = DEFAULT_NET_IP, isSubnetFromHosts: bool = False, wantedSubnets: int = 0, wantedHosts: int = 0) -> None:
         self.ip: str = Reseau.defineIp(self, ip)
-        self.netMask: str = Reseau.defineMask(self, netMask)
+        self.netMask: str = Reseau.defineMask(self, netMask, netAddress)
         self.netAddress: str = Reseau.defineAddress(self, netAddress)
         self.netBroadcast: str = Reseau.defineBroadcast(self)
-        
+
+        self.canCreateFromSubnets: bool = False
+        self.canCreateFromHosts: bool = False
+
+        self.createdSubnet: int = -1
         self.maxNetHosts: int = 0
         self.subnets = Reseau.defineSubnets(self, wantedSubnets, wantedHosts, isSubnetFromHosts)
 
 
         self.str(wantedSubnets,wantedHosts,isSubnetFromHosts)
         
+
+        # Tous les deux faisables: retourner une liste de sous-réseau
+        # Aucun faisable: retourner une liste vide + canCreateFromHosts & canCreateFromSubnets a False
+        # Un seul faisable: retourner une liste vide + canCreateFromHosts ou canCreateFromSubnets a True
+        # fonction defineSubnets() 1 arg en plus initialisé a 0 par defaut 
+        #   => 0 -> gen que si les 2 sont faisables + modif params
+        #   => 1 -> gen que en fonction du nombre de sous-réseau
+        #   => 2 -> gen que en fonction du nombre d'hôtes
+
+
 
 
         #  POUR LA VALEUR DU RETURN SAVOIR QUEL COMMANDE UTILISER POUR AFFICHAGE
@@ -47,6 +61,7 @@ class Reseau():
                + "\n\tSR voulus : " +  str(wantedSubnets)
                + "\n\tHotes voulus par SR : " +  str(wantedHosts)
                + "\n\tDefinition des SR par le nombre d'hotes : " +  str(isSubnetFromHosts)
+               + "\n\tType de découpe : " +  str(self.createdSubnet)
               )
         if(self.netAddress!="-1"):
             for i, sub in enumerate(self.subnets):
@@ -66,21 +81,30 @@ class Reseau():
     def isValidIp(ip: str) -> bool:
         try:
             ip_object = ipaddress.ip_address(ip) 
-            octets = ip.strip().lower().split('.')
-            if(int(octets[0])==127 or int(octets[0])==0):
-                return False
-            return True
+            ipV4 = ipaddress.IPv4Address(ip)
+            return not (ipV4.is_reserved or ipV4.is_link_local or ipV4.is_multicast or ipV4.is_unspecified or ipV4.is_loopback)
+            # octets = ip.strip().lower().split('.')
+            # if(int(octets[0])==127 or int(octets[0])==0):
+                # return False
+            # return True
         except ValueError:
             return False
 
     @staticmethod
-    def defineMask(self, mask: str) -> str:
-        octetsIp = self.ip.strip().lower().split('.')
-
+    def defineMask(self, mask: str, netAdress: str) -> str:
         # Si le masque n'est pas donné, on le défini en fonction de l'ip
+        octetsIp = self.ip.strip().lower().split('.')
+        if (self.ip == DEFAULT_NET_IP):
+            if not hasattr(self, 'netAddress'):
+                self.netAddress = Reseau.defineAddress(self, netAdress)
+                octetsIp = self.netAddress.strip().lower().split('.')
+
         if(mask==""):
+            if(len(octetsIp)!=4):
+                return DEFAULT_NET_IP
+            
             if(int(octetsIp[0])<127):
-                return "255.0.0.0"
+                    return "255.0.0.0"
             elif(int(octetsIp[0])<192):
                 return "255.255.0.0"
             else:
@@ -124,7 +148,7 @@ class Reseau():
                 if est_contigu:
                     if val_octet != 255:
                         # Si l'octet qui n'est pas a 255 n'est pas un des octets contigus, retourner False
-                        if not (val_octet in [0, 128, 192, 224, 240, 248, 252, 254, 255])  :
+                        if not (val_octet in [0, 128, 192, 224, 240, 248, 252, 254])  :
                             return False
                         
                         est_contigu = False
@@ -145,21 +169,27 @@ class Reseau():
 
     @staticmethod
     def defineAddress(self, netAddress: str) -> str:
-        net = ipaddress.IPv4Network(self.ip + '/' + self.netMask, False)
-
-        # Si pas de réseau donné, on le défini en fonction de l'ip et du masque
-        if (netAddress == DEFAULT_NET_IP):
-            return f'{net.network_address:s}'
-        
-        # Si un réseau est donné, on vérifie qu'il est valide et qu'il correspond à l'ip et au masque
-        if (Reseau.isValidAddress(netAddress)):
-            if(netAddress==f'{net.network_address:s}'):
+        if (self.ip == DEFAULT_NET_IP):
+            if (Reseau.isValidAddress(netAddress)):
                 return netAddress
             else:
-                # Return -1 pour l'application 2
-                return "-1"
-        else:
-            return DEFAULT_NET_IP
+                return DEFAULT_NET_IP
+        else:   
+            net = ipaddress.IPv4Network(self.ip + '/' + self.netMask, False)
+
+            # Si pas de réseau donné, on le défini en fonction de l'ip et du masque
+            if (netAddress == DEFAULT_NET_IP):
+                return f'{net.network_address:s}'
+        
+            # Si un réseau est donné, on vérifie qu'il est valide et qu'il correspond à l'ip et au masque
+            if (Reseau.isValidAddress(netAddress)):
+                if(netAddress==f'{net.network_address:s}'):
+                    return netAddress
+                else:
+                    # Return -1 pour l'application 2
+                    return "-1"
+            else:
+                return DEFAULT_NET_IP
     
     @staticmethod
     def isValidAddress(netAddress: str) -> bool:
@@ -175,15 +205,14 @@ class Reseau():
     @staticmethod
     def defineBroadcast(self) -> str:
         if (self.netAddress != DEFAULT_NET_IP and self.netAddress != "-1"):
-            net = ipaddress.IPv4Network(self.ip + '/' + self.netMask, False)
+            net = ipaddress.IPv4Network(self.netAddress + '/' + self.netMask, False)
             return f'{net.broadcast_address:s}'
         else:
             return DEFAULT_NET_IP
 
-
     @staticmethod
-    def defineSubnets(self, nbSubnets, nbHosts, fromHosts) -> list[ipaddress.IPv4Network]:
-        if (self.netAddress != DEFAULT_NET_IP and self.netAddress != "-1" and self.netMask != DEFAULT_NET_IP):
+    def defineSubnets(self, nbSubnets, nbHosts, fromHosts, gen: int = 0) -> list[ipaddress.IPv4Network]:
+        if (self.netAddress != DEFAULT_NET_IP and self.netAddress != "-1" and self.netMask != DEFAULT_NET_IP and nbHosts != 0 and nbSubnets != 0):
             
             # Renvoye un network tel que -> 192.168.33.21/24
             network = ipaddress.IPv4Network(self.netAddress + '/' + self.netMask, strict=False)
@@ -216,6 +245,7 @@ class Reseau():
                     subnets_list = list(subnet)
                     self.maxNetHosts = subnets_list[0].num_addresses-2
 
+                    self.createdSubnet = 2 # SR IMPOSSIBLE -> HOSTS
                     return subnets_list
                       
             else:
@@ -226,6 +256,7 @@ class Reseau():
 
                 if self.maxNetHosts<nbHosts:
                     # seulement en SR
+                    self.createdSubnet = 1 # HOSTS IMPOSSIBLE -> SR
                     return subnets_list
 
                 else:
@@ -243,5 +274,11 @@ class Reseau():
                         subnets_list = list(subnet)
                         self.maxNetHosts = subnets_list[0].num_addresses-2
 
-                        return subnets_list
+                        self.createdSubnet = 2
+                        return subnets_list                    
+                    self.createdSubnet = 0
                     return subnets_list
+        else:
+            return list()
+
+
