@@ -51,6 +51,8 @@ class Reseau():
                + "\n\tHotes voulus par SR : " +  str(wantedHosts)
                + "\n\tType de sous-réseaux : " +  str(subnetGenType)
                + "\n\tType de découpe : " +  str(self.createdSubnet)
+               + "\n\tisHosts : " +  str(self.canCreateFromHosts)
+               + "\n\tisSubnets : " +  str(self.canCreateFromSubnets)
               )
         if(self.netAddress!="-1"):
             for i, sub in enumerate(self.subnets):
@@ -270,8 +272,6 @@ class Reseau():
                 subnet = network.subnets(new_prefix=network.prefixlen)
                 subnets_list = list(subnet)
                 return Reseau.Host(self,nbHosts,network)
-
-                            
         else:
             return list()
 
