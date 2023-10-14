@@ -724,7 +724,7 @@ class Application3(CTkFrame):
             return
         
         # Instance de Reseau
-        res = Reseau(DEFAULT_NET_IP, self.app3EntryMask.get() if self.hasCustomMask.get() == "on" else "", self.app3dataRes.get(), True, int(self.app3dataSr.get()), int(self.app3dataHotes.get()))
+        res = Reseau(DEFAULT_NET_IP, self.app3EntryMask.get() if self.hasCustomMask.get() == "on" else "", self.app3dataRes.get(), int(self.app3dataSr.get()), int(self.app3dataHotes.get()))
 
         # Vérification des champs
         print(res.netAddress)
