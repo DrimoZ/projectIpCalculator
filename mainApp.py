@@ -734,10 +734,7 @@ class Application3(CTkFrame):
                 # Liste renvoyée par la fonction de découpage non-vide
                 
                 pass
-            elif (res.subnets == [] and not res.canCreateFromHosts and not res.canCreateFromSubnets): 
-                #Pas possible de creer un quelconque sous-réseau avec les données entrées
-                
-                labOutResult.place(y=OUTPUT_FRAME_SIZE_Y/2, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
+            
 
 
 

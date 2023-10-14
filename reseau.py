@@ -252,6 +252,7 @@ class Reseau():
                     return subnets_list
         else:
             return list()
+
         
     def Host(self,nbHosts,network:ipaddress.IPv4Network) -> list[ipaddress.IPv4Network]:
         # Découpe seulement en hote
