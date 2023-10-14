@@ -648,17 +648,17 @@ class Application3(CTkFrame):
         labOutTitre.place(y=30, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
         self.labOutResult = CTkLabel(self.app3OutputFrame, text="Impossible de créer un sous-réseau avec les données entrées.", text_color="red")
         # Frame de la table/buttons
-        self.app3frameSubnets = CTkFrame(self.app3OutputFrame, width=519, height=215)
+        self.app3frameSubnets = CTkFrame(self.app3OutputFrame, width=519, height=185)
         self.app3strSubnets = StringVar()
         self.app3strSubnets.set("")
-        labOutDecoupe = CTkLabel(self.app3frameSubnets, textvariable=self.app3strSubnets)
-        labOutDecoupe.place(y=10, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
+        labOutDecoupe = CTkLabel(self.app3OutputFrame, textvariable=self.app3strSubnets, text_color="green")
+        labOutDecoupe.place(y=70, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
 
         # Choix du paramètre de création des SR (Hotes ou nb de Sr) si besoin
-        self.app3btnPrefSr = CTkButton(self.app3frameSubnets, text="Prioriser la découpe par nombre de SR", cursor="hand2", width=(TITLE_OUTPUT_SIZE_X - 50)/2, height=30,
+        self.app3btnPrefSr = CTkButton(self.app3frameSubnets, text="Prioriser par nombre de SR", cursor="hand2", width=(TITLE_OUTPUT_SIZE_X - 50)/2, height=30,
                                 corner_radius=0, fg_color=BUTTON_FG_COLOR)
         
-        self.app3btnPrefHotes = CTkButton(self.app3frameSubnets, text="Prioriser la découpe par nombre d'hôtes par SR", cursor="hand2", width=(TITLE_OUTPUT_SIZE_X - 50)/2, height=30,
+        self.app3btnPrefHotes = CTkButton(self.app3frameSubnets, text="Prioriser par nombre d'hôtes par SR", cursor="hand2", width=(TITLE_OUTPUT_SIZE_X - 50)/2, height=30,
                                 corner_radius=0, fg_color=BUTTON_FG_COLOR)
         
         
@@ -733,26 +733,47 @@ class Application3(CTkFrame):
         elif (res.netAddress == DEFAULT_NET_IP) or (res.netAddress == "-1"):
             self.app3strErr.set("Adresse Réseau non-valide ou réservée")
         else:
+            res.subnets = []
+            res.canCreateFromHosts = True
+            res.canCreateFromSubnets = True
+
             # Vérification de la possibilité de découper le réseau en fonction des 2 parametres
             if (res.subnets != []):
                 # Liste renvoyée par la fonction de découpage non-vide
                 self.appendTable(res)
+                self.app3strSubnets.set("Découpe en sous-réseaux possible via les deux paramètres.")
                 self.app3tvSubnets.place(x=0, y=0)
-                self.app3frameSubnets.place(x=25, y=70)
+                self.app3frameSubnets.configure(height=185)
+                self.app3frameSubnets.place(x=25, y=100)
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+
             elif (not res.canCreateFromHosts and not res.canCreateFromSubnets): 
                 #Pas possible de creer un quelconque sous-réseau avec les données entrées
                 self.labOutResult.place(y=OUTPUT_FRAME_SIZE_Y/2, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+
             elif (res.canCreateFromHosts and res.canCreateFromSubnets):
                 #Possible de creer un subnets avec les deux values mais SEPEREMENT
-                self.app3frameSubnets.place(x=25, y=70)
+                self.app3strSubnets.set("Découpe en sous-réseaux possible via chaque paramètre séparément.")
+                self.app3frameSubnets.configure(height=30)
+                self.app3frameSubnets.place(x=25, y=90)
+                self.app3btnPrefSr.place(x=0, y=0)
+                self.app3btnPrefHotes.place(x=(TITLE_OUTPUT_SIZE_X - 50)/2, y=0)
+
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+
             elif (res.canCreateFromHosts):
-                self.app3frameSubnets.place(x=25, y=70)
+                # Possible de creer un subnets avec le nombre d'hotes uniquement
+                self.app3strSubnets.set("Découpe en sous-réseaux possible via le nombre d'hôtes.")
+                self.app3frameSubnets.configure(height=185)
+                self.app3frameSubnets.place(x=25, y=90)
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
+
             elif (res.canCreateFromSubnets):
-                self.app3frameSubnets.place(x=25, y=70)
+                # Possible de creer un subnets avec le nombre de sous-réseaux uniquement
+                self.app3strSubnets.set("Découpe en sous-réseaux possible via le nombre de sous-réseaux.")
+                self.app3frameSubnets.configure(height=185)
+                self.app3frameSubnets.place(x=25, y=90)
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
 
 
