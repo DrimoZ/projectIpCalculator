@@ -258,7 +258,7 @@ class Reseau():
                     self.canCreateFromSubnets: bool = True
                     self.canCreateFromHosts: bool = True                 
                     self.createdSubnet = 0
-                    return subnets_list
+                    return list()
         else:
             return list()
 
