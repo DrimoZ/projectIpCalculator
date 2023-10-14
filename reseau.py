@@ -261,9 +261,11 @@ class Reseau():
                             return list()
                         
                         # Subnet Correct (uniquement): 
-                        else:
-                            self.createdSubnet = 2
-                            return subnets_list      
+                        subnet = network.subnets(new_prefix=subnet_mask_length+1)
+                        subnets_list = list(subnet)
+                        self.createdSubnet = 2
+                        return subnets_list      
+                    
             elif (gen == 1):
                 subnet = network.subnets(new_prefix=subnet_mask_length+1)
                 subnets_list = list(subnet)
