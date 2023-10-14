@@ -23,12 +23,14 @@ class Reseau():
         self.canCreateFromSubnets: bool = False
         self.canCreateFromHosts: bool = False
         
+        self.wantedSubnets: int = wantedSubnets
+        self.wantedHosts: int = wantedHosts
         self.createdSubnet: int = -1
         self.maxNetHosts: int = 0
         self.subnets = Reseau.defineSubnets(self, wantedSubnets, wantedHosts)
 
 
-        self.str(wantedSubnets,wantedHosts,subnetGenType)
+        # self.str(subnetGenType)
         
 
         # Tous les deux faisables: retourner une liste de sous-réseau
@@ -40,15 +42,15 @@ class Reseau():
         #   => 2 -> gen que en fonction du nombre d'hôtes
 
     
-    def str(self,wantedSubnets:int,wantedHosts,subnetGenType) -> None:
+    def str(self,subnetGenType) -> None:
         print(
             "Reseau : \n\tIp : " + self.ip 
                + "\n\tMasque : " +  self.netMask 
                + "\n\tRéseau : " +  self.netAddress 
                + "\n\tBroadcast : " +  self.netBroadcast
                + "\n\tHotes max : " +  str(self.maxNetHosts)
-               + "\n\tSR voulus : " +  str(wantedSubnets)
-               + "\n\tHotes voulus par SR : " +  str(wantedHosts)
+               + "\n\tSR voulus : " +  str(self.wantedSubnets)
+               + "\n\tHotes voulus par SR : " +  str(self.wantedHosts)
                + "\n\tType de sous-réseaux : " +  str(subnetGenType)
                + "\n\tType de découpe : " +  str(self.createdSubnet)
                + "\n\tisHosts : " +  str(self.canCreateFromHosts)
@@ -214,9 +216,10 @@ class Reseau():
         if (self.netAddress != DEFAULT_NET_IP and self.netAddress != "-1" and self.netMask != DEFAULT_NET_IP and nbHosts != 0 and nbSubnets != 0):
 
             network = ipaddress.IPv4Network(self.netAddress + '/' + self.netMask, strict=False)
-            
+            subnet_mask_length = network.prefixlen + nbSubnets.bit_length() - 1
+
             if (gen == 0):
-                subnet_mask_length = network.prefixlen + nbSubnets.bit_length() - 1
+                
                 # Subnet Incorrect :
                 if subnet_mask_length >= 30:
 

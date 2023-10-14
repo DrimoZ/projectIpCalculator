@@ -695,20 +695,14 @@ class Application3(CTkFrame):
         if val == 1:
             self.app3btnPrefSr.configure(state=DISABLED, cursor="tcross")
             self.app3btnPrefHotes.configure(state=NORMAL, cursor="hand2")
-
-            res.subnets = Reseau.defineSubnets()
-            self.appendTable(res)
-            self.app3tvSubnets.place(x=0, y=30)
-            self.app3frameSubnets.configure(height=215)
-            
         else:
             self.app3btnPrefSr.configure(state=NORMAL, cursor="hand2")
             self.app3btnPrefHotes.configure(state=DISABLED, cursor="tcross")
 
-            res.subnets = Reseau.defineSubnets()
-            self.appendTable(res)
-            self.app3tvSubnets.place(x=0, y=30)
-            self.app3frameSubnets.configure(height=215)
+        res.subnets = Reseau.defineSubnets(res, res.wantedSubnets, res.wantedHosts, val)
+        self.appendTable(res)
+        self.app3tvSubnets.place(x=0, y=30)
+        self.app3frameSubnets.configure(height=215)
 
     def checkEntries(self, event):
         if (self.hasCustomMask.get() == "off"):
@@ -745,7 +739,6 @@ class Application3(CTkFrame):
         res = Reseau(DEFAULT_NET_IP, self.app3EntryMask.get() if self.hasCustomMask.get() == "on" else "", self.app3dataRes.get(), int(self.app3dataSr.get()), int(self.app3dataHotes.get()))
 
         # Vérification des champs
-        print(res.netAddress)
         if (res.netMask == DEFAULT_NET_IP and self.app3dataMask.get() != ""):
             self.app3strErr.set("Masque Réseau non-valide")
         elif (res.netAddress == DEFAULT_NET_IP) or (res.netAddress == "-1"):
@@ -754,7 +747,7 @@ class Application3(CTkFrame):
             # res.subnets = []
             # res.canCreateFromHosts = True
             # res.canCreateFromSubnets = True
-            print(res.subnets)
+
             # Vérification de la possibilité de découper le réseau en fonction des 2 parametres
             if (res.subnets != [] and res.canCreateFromHosts and res.canCreateFromSubnets):
                 # Liste renvoyée par la fonction de découpage non-vide
@@ -816,9 +809,9 @@ class Application3(CTkFrame):
             # Plage
             f'{sub.network_address+1} - {sub.network_address+res.maxNetHosts}',
             # Pas
-            f'{res.maxNetHosts+2}',
+            f'{sub.num_addresses}',
             # Hôtes
-            f'{res.maxNetHosts}'))
+            f'{sub.num_addresses- 2}'))
         
 
     
