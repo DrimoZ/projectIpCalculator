@@ -27,15 +27,15 @@ def getConnected():
 def setConnected():
     global isConnected
     isConnected = True
-    app.returnButton.config(state= NORMAL, cursor="hand2")
-    app.disconnectButton.config(state= NORMAL, cursor="hand2", command=setDisconnected)
+    app.returnButton.configure(state= NORMAL, cursor="hand2")
+    app.disconnectButton.configure(state= NORMAL, cursor="hand2", command=setDisconnected)
     app.show_frame(HomePage)
 
 def setDisconnected():
     global isConnected
     isConnected = False
-    app.returnButton.config(state= DISABLED, cursor="tcross")
-    app.disconnectButton.config(state= DISABLED, cursor="tcross")
+    app.returnButton.configure(state= DISABLED, cursor="tcross")
+    app.disconnectButton.configure(state= DISABLED, cursor="tcross")
     app.show_frame(Connexion)
 
 # Check Inputs - Allow only Digits or "."
@@ -64,15 +64,15 @@ class MainApplication(Tk):
   
         container.grid_rowconfigure(0, weight = 1)
         container.grid_columnconfigure(0, weight = 1)
-        quitButton = Button(self, text="Quitter l'application", command=self.destroy, cursor="hand2").place(x=SIZE_X-125, y=SIZE_Y-35)
-        githubButton = Button(self, text="GitHub", command=self.ouvrir_github, cursor="hand2").place(x=SIZE_X-125-55, y=SIZE_Y-35)
+        quitButton = CTkButton(self, text="Quitter l'application", command=self.destroy, cursor="hand2", fg_color=BUTTON_FG_COLOR, bg_color='#333232').place(x=SIZE_X-150, y=SIZE_Y-35)
+        githubButton = CTkButton(self, text="GitHub", command=self.ouvrir_github, cursor="hand2", fg_color=BUTTON_FG_COLOR, bg_color='#333232').place(x=SIZE_X-300, y=SIZE_Y-35)
 
-        self.disconnectButton = Button(self, text="Se Déconnecter", cursor="hand2")
-        self.disconnectButton.config(state= DISABLED, cursor="tcross")
-        self.disconnectButton.place(x=130, y=SIZE_Y-35)
+        self.disconnectButton = CTkButton(self, text="Se Déconnecter", cursor="hand2", fg_color=BUTTON_FG_COLOR, bg_color='#333232')
+        self.disconnectButton.configure(state= DISABLED, cursor="tcross")
+        self.disconnectButton.place(x=160, y=SIZE_Y-35)
 
-        self.returnButton = Button(self, text="Retourner au menu", command=lambda : self.show_frame(HomePage))
-        self.returnButton.config(state= DISABLED, cursor="tcross")
+        self.returnButton = CTkButton(self, text="Retourner au menu", command=lambda : self.show_frame(HomePage), fg_color=BUTTON_FG_COLOR, bg_color='#333232')
+        self.returnButton.configure(state= DISABLED, cursor="tcross")
         self.returnButton.place(x=10, y=SIZE_Y-35)
 
         self.frames = {} 
@@ -239,7 +239,7 @@ class Application1(CTkFrame):
                 self.labMask.place_forget()
                 self.app1EntryMask.place_forget()
 
-        checkbox = CTkCheckBox(self.app1InputFrame, text="Découpe en sous-réseaux ?", command=checkbox_event, variable=self.hasCustomMask, onvalue="on", offvalue="off")
+        checkbox = CTkCheckBox(self.app1InputFrame, text="Découpé en sous-réseaux ?", command=checkbox_event, variable=self.hasCustomMask, onvalue="on", offvalue="off")
         checkbox.place(y=160, x=INPUTFRAME_CENTER, anchor="center")
         checkbox.bind("<Button-1>", self.checkEntries)
         
@@ -340,7 +340,7 @@ class Application1(CTkFrame):
 
         # Vérification des champs
         if (res.ip == DEFAULT_NET_IP):
-            self.app1strErr.set("Adresse IP non-valide")
+            self.app1strErr.set("Adresse IP non-valide ou réservée")
         elif (res.netMask == DEFAULT_NET_IP and self.app1DataMask.get() != ""):
             self.app1strErr.set("Masque Réseau non-valide")
         else:
@@ -432,7 +432,7 @@ class Application2(CTkFrame):
                 self.labMask.place_forget()
                 self.app2EntryMask.place_forget()
 
-        checkbox = CTkCheckBox(self.app2InputFrame, text="Découpe en sous-réseaux ?", command=checkbox_event, variable=self.hasCustomMask, onvalue="on", offvalue="off")
+        checkbox = CTkCheckBox(self.app2InputFrame, text="Découpé en sous-réseaux ?", command=checkbox_event, variable=self.hasCustomMask, onvalue="on", offvalue="off")
         checkbox.place(y=210, x=INPUTFRAME_CENTER, anchor="center")
         checkbox.bind("<Button-1>", self.checkEntries)
         
@@ -507,7 +507,7 @@ class Application2(CTkFrame):
 
         # Vérification des champs
         if (res.ip == "0.0.0.0"):
-            self.app2strErr.set("Adresse IP non-valide")
+            self.app2strErr.set("Adresse IP non-valide ou réservée")
         elif (res.netMask == "0.0.0.0" and self.app2EntryMask.get() != ""):
             self.app2strErr.set("Masque Réseau non-valide")
         elif (res.netAddress == "0.0.0.0"):
@@ -642,17 +642,22 @@ class Application3(CTkFrame):
         labErr.place(y=FRAME_SIZE_Y - PAD_Y - 10, x=INPUTFRAME_CENTER, anchor="center")
 
         # Frame d'output
-        # labSr_Hotes = CTkLabel(self.app3InputFrame, text="Paramètre de création des SR")
-        # labSr_Hotes.place(y=140, x=INPUTFRAME_CENTER, anchor="center")
+        labOutTitre = CTkLabel(self.app3OutputFrame, text="Résultats", font = CTkFont("Times", 21, underline=True))
+        labOutTitre.place(y=30, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
+
+        # Frame de la table/buttons
+        self.app3frameSubnets = CTkFrame(self.app3OutputFrame, width=569, height=215)
+        self.app3frameSubnets.place(x=0, y=70)
 
         # Choix du paramètre de création des SR (Hotes ou nb de Sr)
-        # self.btnSr = CTkButton(self.app3InputFrame, text="Par SR", cursor="hand2", width=100, command=lambda : self.setBySr_event(False),
-                            #    corner_radius=0, fg_color=BUTTON_FG_COLOR)
-        # self.btnSr.place(y=170, x=INPUTFRAME_CENTER, anchor="e")
-        # self.btnHotes = CTkButton(self.app3InputFrame, text="Par hôtes", cursor="hand2", width=100, command=lambda : self.setBySr_event(True),
-                                #   corner_radius=0, fg_color=BUTTON_FG_COLOR)
-        # self.btnHotes.place(y=170, x=INPUTFRAME_CENTER, anchor="w")
-
+        self.app3btnPrefSr = CTkButton(self.app3frameSubnets, text="Prioriser la découpe par nombre de SR", cursor="hand2", width=TITLE_OUTPUT_SIZE_X/2, height=30,
+                                corner_radius=0, fg_color=BUTTON_FG_COLOR)
+        self.app3btnPrefSr.place(y=0, x=0)
+        self.app3btnPrefHotes = CTkButton(self.app3frameSubnets, text="Prioriser la découpe par nombre d'hôtes par SR", cursor="hand2", width=TITLE_OUTPUT_SIZE_X/2, height=30,
+                                corner_radius=0, fg_color=BUTTON_FG_COLOR)
+        self.app3btnPrefHotes.place(y=0, x=TITLE_OUTPUT_SIZE_X/2)
+        
+        
 
         #Placement des frames
         self.app3InputFrame.place(x = PAD_X, y = PAD_Y)
@@ -687,101 +692,75 @@ class Application3(CTkFrame):
             return
         
         # Instance de Reseau
-        res = Reseau(self.app3dataRes.get(), self.app3EntryMask.get() if self.hasCustomMask.get() == "on" else "", self.app3dataRes.get(), True, int(self.app3dataSr.get()), int(self.app3dataHotes.get()))
+        res = Reseau(DEFAULT_NET_IP, self.app3EntryMask.get() if self.hasCustomMask.get() == "on" else "", self.app3dataRes.get(), True, int(self.app3dataSr.get()), int(self.app3dataHotes.get()))
 
         # Vérification des champs
+        print(res.netAddress)
         if (res.netMask == DEFAULT_NET_IP and self.app3dataMask.get() != ""):
             self.app3strErr.set("Masque Réseau non-valide")
         elif (res.netAddress == DEFAULT_NET_IP) or (res.netAddress == "-1"):
-            self.app3strErr.set("Adresse Réseau non-valide")
+            self.app3strErr.set("Adresse Réseau non-valide ou réservée")
         else:
-            # Déterminer s’il sera possible ou pas de réaliser une découpe 
-            # classique sur base du nombre de SR. Si la réponse est oui, le 
-            # programme devra fournir le plan d’adressage complet de la 
-            # découpe demandée. Il devra également indiquer combien de SR on 
-            # peut avoir au maximum dans cette découpe
-
-            # Calculer le masque de sous-réseau approprié pour le nombre de sous-réseaux
-            # subnet_mask_length = net.prefixlen + int(self.textSR.get()).bit_length() - 1
-            # if subnet_mask_length > 32:
-            #     print("Nombre de sous-réseaux souhaité trop élevé pour l'adresse IP donnée.")
-            # else:
-            #     subnet = net.subnets(new_prefix=subnet_mask_length)
-            #     subnets_list = list(subnet)
-
-            #     # Afficher les informations sur les sous-réseaux créés
-            #     print(f"Adresse IP d'origine : {net.network_address}/{net.prefixlen}")
-            #     print(f"Masque de sous-réseau pour {int(self.textSR.get())} sous-réseaux : /{subnet_mask_length}")
-
-            #     for i, sub in enumerate(subnets_list):
-            #         print(f"Sous-réseau {i+1} : {sub.network_address}/{subnet_mask_length}")
-
-            #define a frame that will contian the table and scrollbar
-            self.tableFrame = CTkFrame(self, width=600, height=150)
-            self.tableFrame.grid_propagate(0)
-
-            #define the table with tkinter
-            self.table = ttk.Treeview(self.tableFrame, column=('Numéro', 'Adresse Réseau', '1er IP', 'Dernière IP', 'Broadcast', 'Hôtes'), show="headings", height=6)
-            self.table.heading('#1', text='Numéro')
-            self.table.heading('#2', text='Adresse Réseau')
-            self.table.heading('#3', text='1er IP')
-            self.table.heading('#4', text='Dernière IP')
-            self.table.heading('#5', text='Broadcast')
+            self.table = ttk.Treeview(self.app3frameSubnets, column=('N° SR', 'Adresse SR', 'Broadcast', 'Plage Ip', 'Pas', 'Hôtes'), show="headings", height=8)
+            self.table.heading('#1', text='N° SR')
+            self.table.heading('#2', text='Adresse SR')
+            self.table.heading('#3', text='Broadcast')
+            self.table.heading('#4', text='Plage IP')
+            self.table.heading('#5', text='Pas')
             self.table.heading('#6', text='Hôtes')
 
             self.table.column('#0', minwidth=0, width=0, stretch=False)
-            self.table.column('#1', stretch=False, minwidth=75, width=75, anchor=CENTER)
+            self.table.column('#1', stretch=False, minwidth=50, width=50, anchor=CENTER)
             self.table.column('#2', stretch=False, minwidth=100, width=100, anchor=CENTER)
             self.table.column('#3', stretch=False, minwidth=100, width=100, anchor=CENTER)
-            self.table.column('#4', stretch=False, minwidth=100, width=100, anchor=CENTER)
+            self.table.column('#4', stretch=False, minwidth=170, width=170, anchor=CENTER)
             self.table.column('#5', stretch=False, minwidth=100, width=100, anchor=CENTER)
-            self.table.column('#6', stretch=False, minwidth=50, width=50, anchor=CENTER)
+            self.table.column('#6', stretch=False, minwidth=49, width=49, anchor=CENTER)
 
-            self.table.grid(row=0, column=0)
+            self.table.place(x=0, y=30)
             
-            scrollbar = Scrollbar(self.tableFrame, orient=VERTICAL, command=self.table.yview)
+            scrollbar = Scrollbar(self.app3frameSubnets, orient=VERTICAL, command=self.table.yview)
             self.table.configure(yscroll=scrollbar.set)
-            scrollbar.grid(row=0, column=1)
-
-            self.tableFrame.place(x=340, y=200)
 
             def handle_click(event):
                 if self.table.identify_region(event.x, event.y) == "separator":
                     return "break"
             self.table.bind('<Button-1>', handle_click)
-
+            
             #add data to the table
-
             for i, sub in enumerate(res.subnets):
                 self.table.insert(parent='', index='end', iid=i, text= f'{i+1}', values=(
                 # Numéro
-                f'SR {i+1}', 
-                # Adresse Réseau
+                f'{i+1}', 
+                # Adresse sr
                 f'{sub.network_address}/{sub.prefixlen}',
-                # 1er IP
-                f'{sub.network_address+1}',
-                # Dernière IP
-                f'{sub.network_address+res.maxNetHosts}',
                 # Broadcast
                 f'{sub.network_address+res.maxNetHosts+1}',
+                # Plage
+                f'{sub.network_address+1} - {sub.network_address+res.maxNetHosts}',
+                # Pas
+                f'{res.maxNetHosts+2}',
                 # Hôtes
                 f'{res.maxNetHosts}'))
+            
+            self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
 
-
+    
+    
     # Fonction de reset de la frame
     def reset(self) -> None:
         self.app3BtnCheck.configure(state=DISABLED, cursor="tcross")
         self.hasCustomMask.set("off")
 
-        self.app3dataRes.set("")
-        self.app3dataRes.set("")
-        self.app3dataHotes.set("")
-        self.app3dataSr.set("")
+        self.app3dataRes.set("192.168.23.0")
+        self.app3dataMask.set("")
+        self.app3dataHotes.set("12")
+        self.app3dataSr.set("12")
 
         self.labMask.place_forget()
         self.app3EntryMask.place_forget()
 
-        # self.app3OutputFrame.place_forget()
+        self.app3OutputFrame.place_forget()
 
         self.app3strErr.set("")
 
