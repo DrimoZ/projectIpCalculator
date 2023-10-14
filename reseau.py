@@ -246,7 +246,6 @@ class Reseau():
                     return Reseau.Host(self,nbHosts,network)    
                       
             else:
-
                 subnet = network.subnets(new_prefix=subnet_mask_length+1)
                 subnets_list = list(subnet)
                 self.maxNetHosts =subnets_list[0].num_addresses-2

@@ -656,10 +656,10 @@ class Application3(CTkFrame):
 
         # Choix du paramètre de création des SR (Hotes ou nb de Sr) si besoin
         self.app3btnPrefSr = CTkButton(self.app3frameSubnets, text="Prioriser par nombre de SR", cursor="hand2", width=(TITLE_OUTPUT_SIZE_X - 50)/2, height=30,
-                                corner_radius=0, fg_color=BUTTON_FG_COLOR)
+                                corner_radius=0, fg_color=BUTTON_FG_COLOR, text_color_disabled="blue")
         
         self.app3btnPrefHotes = CTkButton(self.app3frameSubnets, text="Prioriser par nombre d'hôtes par SR", cursor="hand2", width=(TITLE_OUTPUT_SIZE_X - 50)/2, height=30,
-                                corner_radius=0, fg_color=BUTTON_FG_COLOR)
+                                corner_radius=0, fg_color=BUTTON_FG_COLOR, text_color_disabled="blue")
         
         
         #Treeview
@@ -691,7 +691,24 @@ class Application3(CTkFrame):
         self.app3InputFrame.place(x = PAD_X, y = PAD_Y)
         app3TitleFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = PAD_Y)
 
-        
+    def generateSubnetSeparatly(self, res: Reseau, val: int) -> None:
+        if val == 1:
+            self.app3btnPrefSr.configure(state=DISABLED, cursor="tcross")
+            self.app3btnPrefHotes.configure(state=NORMAL, cursor="hand2")
+
+            res.subnets = Reseau.defineSubnets()
+            self.appendTable(res)
+            self.app3tvSubnets.place(x=0, y=30)
+            self.app3frameSubnets.configure(height=215)
+            
+        else:
+            self.app3btnPrefSr.configure(state=NORMAL, cursor="hand2")
+            self.app3btnPrefHotes.configure(state=DISABLED, cursor="tcross")
+
+            res.subnets = Reseau.defineSubnets()
+            self.appendTable(res)
+            self.app3tvSubnets.place(x=0, y=30)
+            self.app3frameSubnets.configure(height=215)
 
     def checkEntries(self, event):
         if (self.hasCustomMask.get() == "off"):
@@ -717,6 +734,7 @@ class Application3(CTkFrame):
         self.app3btnPrefSr.place_forget()
         self.app3btnPrefHotes.place_forget()
         self.app3tvSubnets.place_forget()
+        self.app3strSubnets.set("")
 
         # Un des champs est vide
         if (self.app3dataRes.get() == "" or self.app3dataHotes.get() == "" or self.app3dataSr.get() == "" or (self.hasCustomMask.get() == "on" and self.app3dataMask.get() == "")):
@@ -733,15 +751,15 @@ class Application3(CTkFrame):
         elif (res.netAddress == DEFAULT_NET_IP) or (res.netAddress == "-1"):
             self.app3strErr.set("Adresse Réseau non-valide ou réservée")
         else:
-            # res.subnets = []
-            # res.canCreateFromHosts = True
-            # res.canCreateFromSubnets = True
+            res.subnets = []
+            res.canCreateFromHosts = True
+            res.canCreateFromSubnets = True
 
             # Vérification de la possibilité de découper le réseau en fonction des 2 parametres
             if (res.subnets != [] and res.canCreateFromHosts and res.canCreateFromSubnets):
                 # Liste renvoyée par la fonction de découpage non-vide
-                self.appendTable(res)
                 self.app3strSubnets.set("Découpe en sous-réseaux possible via les deux paramètres.")
+                self.appendTable(res)
                 self.app3tvSubnets.place(x=0, y=0)
                 self.app3frameSubnets.configure(height=185)
                 self.app3frameSubnets.place(x=25, y=100)
@@ -756,30 +774,32 @@ class Application3(CTkFrame):
                 #Possible de creer un subnets avec les deux values mais SEPEREMENT
                 self.app3strSubnets.set("Découpe en sous-réseaux possible via chaque paramètre séparément.")
                 self.app3frameSubnets.configure(height=30)
-                self.app3frameSubnets.place(x=25, y=90)
+                self.app3frameSubnets.place(x=25, y=100)
+
                 self.app3btnPrefSr.place(x=0, y=0)
+                self.app3btnPrefSr.configure(command= lambda: self.generateSubnetSeparatly(res, 1))
                 self.app3btnPrefHotes.place(x=(TITLE_OUTPUT_SIZE_X - 50)/2, y=0)
+                self.app3btnPrefHotes.configure(command= lambda: self.generateSubnetSeparatly(res, 2))
 
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
 
             elif (res.subnets != [] and res.canCreateFromHosts):
                 # Possible de creer un subnets avec le nombre d'hotes uniquement
                 self.app3strSubnets.set("Découpe en sous-réseaux possible via le nombre d'hôtes.")
+                self.appendTable(res)
+                self.app3tvSubnets.place(x=0, y=0)
                 self.app3frameSubnets.configure(height=185)
-                self.app3frameSubnets.place(x=25, y=90)
+                self.app3frameSubnets.place(x=25, y=100)
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
 
             elif (res.subnets != [] and res.canCreateFromSubnets):
                 # Possible de creer un subnets avec le nombre de sous-réseaux uniquement
                 self.app3strSubnets.set("Découpe en sous-réseaux possible via le nombre de sous-réseaux.")
+                self.appendTable(res)
+                self.app3tvSubnets.place(x=0, y=0)
                 self.app3frameSubnets.configure(height=185)
-                self.app3frameSubnets.place(x=25, y=90)
+                self.app3frameSubnets.place(x=25, y=100)
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
-
-
-
-            
-            
             
 
     def appendTable(self, res: Reseau):
@@ -815,6 +835,7 @@ class Application3(CTkFrame):
         self.labMask.place_forget()
         self.app3EntryMask.place_forget()
 
+        self.app3strSubnets.set("")
         self.app3OutputFrame.place_forget()
         self.labOutResult.place_forget()
         self.app3frameSubnets.place_forget()
