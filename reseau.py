@@ -213,10 +213,8 @@ class Reseau():
             
             network = ipaddress.IPv4Network(self.netAddress + '/' + self.netMask, strict=False)
             subnet_mask_length = network.prefixlen + nbSubnets.bit_length() - 1
-
             # Si au dessus de 32 on se base que sur le nbr d'hôte et nn de sous-réseau
-            if subnet_mask_length > 32:
-
+            if subnet_mask_length >= 30:
                 # Calcul du subnet par rapport au nbr d'hôte
                 subnet = network.subnets(new_prefix=network.prefixlen)
                 subnets_list = list(subnet)
