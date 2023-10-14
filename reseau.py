@@ -51,6 +51,8 @@ class Reseau():
                + "\n\tHotes voulus par SR : " +  str(wantedHosts)
                + "\n\tType de sous-réseaux : " +  str(subnetGenType)
                + "\n\tType de découpe : " +  str(self.createdSubnet)
+               + "\n\tisHosts : " +  str(self.canCreateFromHosts)
+               + "\n\tisSubnets : " +  str(self.canCreateFromSubnets)
               )
         if(self.netAddress!="-1"):
             for i, sub in enumerate(self.subnets):
@@ -210,6 +212,9 @@ class Reseau():
     @staticmethod
     def defineSubnets(self, nbSubnets, nbHosts, gen: int = 0) -> list[ipaddress.IPv4Network]:
         if (self.netAddress != DEFAULT_NET_IP and self.netAddress != "-1" and self.netMask != DEFAULT_NET_IP and nbHosts != 0 and nbSubnets != 0):
+            self.canCreateFromSubnets = False
+            self.canCreateFromHosts = False
+
             if (gen == 0):
                 # INIT de la classe -> renvoie uniquemenet une liste si les 2 sont faisables ensembles
                 # si 2 possibles separement -> list = empty + canCreateFromHosts & canCreateFromSubnets a True
@@ -250,7 +255,7 @@ class Reseau():
 
                 if self.maxNetHosts<nbHosts:
                     # seulement en SR
-                    self.canCreateFromHosts: bool = True
+                    self.canCreateFromSubnets: bool = True
                     self.createdSubnet = 1 # HOSTS IMPOSSIBLE -> SR
                     return subnets_list
 
@@ -258,7 +263,7 @@ class Reseau():
                     self.canCreateFromSubnets: bool = True
                     self.canCreateFromHosts: bool = True                 
                     self.createdSubnet = 0
-                    return list()
+                    return subnets_list
         else:
             return list()
 

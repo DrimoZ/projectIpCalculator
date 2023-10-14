@@ -724,7 +724,7 @@ class Application3(CTkFrame):
             return
         
         # Instance de Reseau
-        res = Reseau(DEFAULT_NET_IP, self.app3EntryMask.get() if self.hasCustomMask.get() == "on" else "", self.app3dataRes.get(), True, int(self.app3dataSr.get()), int(self.app3dataHotes.get()))
+        res = Reseau(DEFAULT_NET_IP, self.app3EntryMask.get() if self.hasCustomMask.get() == "on" else "", self.app3dataRes.get(), int(self.app3dataSr.get()), int(self.app3dataHotes.get()))
 
         # Vérification des champs
         print(res.netAddress)
@@ -738,7 +738,7 @@ class Application3(CTkFrame):
             # res.canCreateFromSubnets = True
 
             # Vérification de la possibilité de découper le réseau en fonction des 2 parametres
-            if (res.subnets != []):
+            if (res.subnets != [] and res.canCreateFromHosts and res.canCreateFromSubnets):
                 # Liste renvoyée par la fonction de découpage non-vide
                 self.appendTable(res)
                 self.app3strSubnets.set("Découpe en sous-réseaux possible via les deux paramètres.")
@@ -747,12 +747,12 @@ class Application3(CTkFrame):
                 self.app3frameSubnets.place(x=25, y=100)
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
 
-            elif (not res.canCreateFromHosts and not res.canCreateFromSubnets): 
+            elif (res.subnets == [] and not res.canCreateFromHosts and not res.canCreateFromSubnets): 
                 #Pas possible de creer un quelconque sous-réseau avec les données entrées
                 self.labOutResult.place(y=OUTPUT_FRAME_SIZE_Y/2, x=TITLE_OUTPUT_SIZE_X/2, anchor="center")
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
 
-            elif (res.canCreateFromHosts and res.canCreateFromSubnets):
+            elif (res.subnets == [] and res.canCreateFromHosts and res.canCreateFromSubnets):
                 #Possible de creer un subnets avec les deux values mais SEPEREMENT
                 self.app3strSubnets.set("Découpe en sous-réseaux possible via chaque paramètre séparément.")
                 self.app3frameSubnets.configure(height=30)
@@ -762,14 +762,14 @@ class Application3(CTkFrame):
 
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
 
-            elif (res.canCreateFromHosts):
+            elif (res.subnets != [] and res.canCreateFromHosts):
                 # Possible de creer un subnets avec le nombre d'hotes uniquement
                 self.app3strSubnets.set("Découpe en sous-réseaux possible via le nombre d'hôtes.")
                 self.app3frameSubnets.configure(height=185)
                 self.app3frameSubnets.place(x=25, y=90)
                 self.app3OutputFrame.place(x=2 * PAD_X + INPUTFRAME_SIZE_X, y = 2*PAD_Y + TITLE_FRAME_SIZE_Y)
 
-            elif (res.canCreateFromSubnets):
+            elif (res.subnets != [] and res.canCreateFromSubnets):
                 # Possible de creer un subnets avec le nombre de sous-réseaux uniquement
                 self.app3strSubnets.set("Découpe en sous-réseaux possible via le nombre de sous-réseaux.")
                 self.app3frameSubnets.configure(height=185)
