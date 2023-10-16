@@ -1,5 +1,6 @@
 from constants import DEFAULT_NET_IP
 import ipaddress
+import math
 
 
 # Classe Reseau - OOP
@@ -77,9 +78,10 @@ class Reseau():
             ipV4 = ipaddress.IPv4Address(ip)
             return not (ipV4.is_reserved or ipV4.is_link_local or ipV4.is_multicast or ipV4.is_unspecified or ipV4.is_loopback)
         
-            # octets = ip.strip().lower().split('.')
-            # if(int(octets[0])==127 or int(octets[0])==0):
-                # return False
+            octets = ip.strip().lower().split('.')
+            if(int(octets[0])==127 or int(octets[0])==0):
+                return False
+
             # return True
         except ValueError:
             return False
@@ -239,7 +241,7 @@ class Reseau():
 
                 # Subnet Correct :      
                 else:
-                    self.canCreateFromHosts: bool = True
+                    self.canCreateFromSubnets: bool = True
                     
                     subnet = network.subnets(new_prefix=subnet_mask_length+1)
                     subnets_list = list(subnet)
@@ -248,7 +250,7 @@ class Reseau():
                     # Host correct (2 en meme temp)
                     if self.maxNetHosts>=nbHosts:
                         self.createdSubnet = 0 
-                        self.canCreateFromSubnets: bool = True
+                        self.canCreateFromHosts: bool = True
                         return subnets_list
                     
                     # Host Incorrect (pas en meme temp)
@@ -260,12 +262,13 @@ class Reseau():
                         # Host correct (2 Séparement)
                         if self.maxNetHosts>=nbHosts:
                             self.createdSubnet = -1 
-                            self.canCreateFromSubnets: bool = True
+                            self.canCreateFromHosts: bool = True
                             return list()
                         
                         # Subnet Correct (uniquement): 
                         subnet = network.subnets(new_prefix=subnet_mask_length+1)
                         subnets_list = list(subnet)
+                        self.maxNetHosts = subnets_list[0].num_addresses-2
                         self.createdSubnet = 2
                         return subnets_list      
                     
@@ -283,14 +286,14 @@ class Reseau():
         
     def Host(self,nbHosts,network:ipaddress.IPv4Network) -> list[ipaddress.IPv4Network]:
         # Découpe seulement en hote
-        match network.prefixlen:
-            case 8:
-                subnet_mask_addition=8388608
-            case 16:
-                subnet_mask_addition=32768
-            case 24:
-                subnet_mask_addition=128
-        
+        # match network.prefixlen:
+        #     case 8:
+        #         subnet_mask_addition=8388608
+        #     case 16:
+        #         subnet_mask_addition=32768
+        #     case 24:
+        #         subnet_mask_addition=128
+        subnet_mask_addition = pow(2,32-network.prefixlen-1)
         subnet_mask=1
         while subnet_mask_addition-2>=nbHosts:
             subnet_mask+=1
